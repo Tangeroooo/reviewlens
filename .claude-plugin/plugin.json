@@ -1,0 +1,8 @@
+{
+  "name": "reviewlens",
+  "version": "0.1.0",
+  "description": "Evidence-driven, multi-lens code review for general engineering, Rust, and systems/database changes",
+  "author": { "name": "Tangeroooo" },
+  "repository": "https://github.com/Tangeroooo/reviewlens",
+  "license": "MIT"
+}

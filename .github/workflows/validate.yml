@@ -1,0 +1,13 @@
+name: Validate ReviewLens distribution
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate manifests, links, structure, and bilingual docs
+        run: python3 -m unittest discover -s tests -v
