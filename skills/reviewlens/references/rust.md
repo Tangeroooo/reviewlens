@@ -25,6 +25,14 @@ Use for changed Rust code. Combine the language-safety emphasis inspired by Trai
 - **Pointer/sync complexity:** Do not prescribe `Arc<Mutex<T>>` or remove it without verifying ownership and concurrent access. Avoid gratuitous atomic lock-free rewrites.
 - **Idioms:** Favor transparent control flow, correct `Result` handling, predictable types, and minimal boilerplate. Preserve established naming, lint, and dependency standards. Avoid mass renaming for taste.
 
+## Adversarial Rust probes (high-risk changes)
+
+- **Unsafe proofs:** List preconditions and postconditions for each modified unsafe boundary. Attempt one counterexample for aliasing, pointer provenance/alignment, initialization, length/capacity, panic/unwind, or lifetime as applicable. Also inspect whether a *safe public API* allows a caller to break the unsafe preconditions.
+- **Publication and synchronization:** Distinguish concurrent execution from an actual race. Write a concrete ordering showing which store/load/lock establishes the required visibility. Examine stale generation, lost wake-ups, ABA, double-release, and teardown races only where the code makes them plausible.
+- **Panic and cancellation:** Follow ownership of resources when an async future is dropped, a task is aborted, or a callback panics. Check whether `Drop` restores invariants or whether partial state becomes externally visible.
+- **Boundary/control:** A passing borrow check, `Send`/`Sync` inference, clippy, or Miri run is evidence about certain classes of behavior, **not** proof of overall API or storage correctness. Never claim UB solely from a suspicious primitive.
+- **`unwrap()` / `expect()` defaults remain REQUIRED:** A changed production use can be reported as a standards issue even if impossibility of failure has been established; demonstrate a reachable error path before claiming a crash. Respect genuine test-only or generated-code exceptions.
+
 ## Targeted validation (only if available and appropriate)
 
 - `cargo fmt --check`, `cargo clippy`, `cargo test` according to repo instructions; do not silently modify files or fetch packages. Request permission before costly checks.

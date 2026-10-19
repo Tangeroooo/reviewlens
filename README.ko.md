@@ -1,6 +1,6 @@
 # ReviewLens
 
-**일반적인 코드 품질부터 Rust·시스템·데이터베이스의 안전성까지 검토하는 증거 중심 코드 리뷰 스킬입니다.**
+**불변식을 의심하고 반례를 검증하는 적대적 코드 리뷰 스킬입니다. 범용 코드부터 Rust·시스템·데이터베이스까지 지원합니다.**
 
 ReviewLens는 **Claude Code와 OpenAI Codex**에서 사용할 수 있는 [Agent Skill](https://agentskills.io/specification)입니다. 코드의 변경 범위를 파악하고 필요한 리뷰 관점만 선택합니다. 서브 에이전트가 지원되는 환경에서는 독립적인 리뷰와 Finding 검증을 수행하며, 지원되지 않는 환경에서는 단계별 검토로 전환합니다.
 
@@ -15,15 +15,27 @@ ReviewLens는 **Claude Code와 OpenAI Codex**에서 사용할 수 있는 [Agent 
 | **Rust** | Unsafe 불변식, 소유권, FFI, panic, lock, Rust 관용구 | Rust 변경 시 |
 | **Systems** | Async/Cancellation, Backpressure, 메모리 예산, DB 정합성·복구 | 관련 시스템 코드 변경 시 |
 
-일반적인 리뷰에서는 **1~3개의 발견용 리뷰어**를 사용하며, 중요한 Finding을 선택적으로 재검증합니다. 요구사항에 대한 Spec 결과와 기술/규칙에 대한 결과는 분리해 보고합니다.
+일반 변경은 **Standard**(발견용 리뷰 1~3회), `unsafe`·Storage Recovery·인증·동시성 등 고위험 변경은 **Adversarial** 모드로 검토합니다. Adversarial은 독립 **Challenger** 리뷰(서브 에이전트 지원 시)와 모든 실질적 결함 후보의 반증 검증을 추가합니다. Spec 결과와 기술/규칙 검토는 별도로 보고합니다.
 
 ### 검토 정책
 
 - **프로덕션 `unwrap()`/`expect()` 금지**: 원칙적으로 사용하지 않으며, 단순 규칙 위반과 실제 panic 위험을 구분합니다. 테스트 코드는 예외입니다.
 - **`parking_lot`**: 기계적으로 권장하지 않습니다. Lock 경합, poisoning, 비동기 경계, 의존성 비용과 기존 관례를 검토합니다.
 - **`tracing`**: 프로젝트에서 사용하는 로깅 체계를 따릅니다. 특정 crate로의 교체를 강제하지 않습니다.
-- **Finding**: 실제로 변경된 위치와 실행 조건, 영향, 증거, 수정 방향을 제시합니다.
+- **Finding**: 불변식, 변경 위치, 재현 조건·실행 경로, 영향, 기존 방어 로직, 수정·테스트 방향을 요구합니다. 반증되거나 미확인인 가설은 확정 버그로 보고하지 않습니다.
 - Rust 이외의 언어도 General/Spec 리뷰로 검토할 수 있습니다.
+
+## 리뷰 강도 선택
+
+- **Standard**: 일반적인 PR의 정확성·설계·요구사항·필요한 Rust/Systems 검토.
+- **Adversarial**: 실제 불변식을 식별하고, 충돌/취소/재시도/크래시 등 반례를 찾으며, 독립 검증과 Coverage를 기록. 고위험 변경에 자동 적용하거나 명시적으로 요청 가능.
+
+```text
+/reviewlens:reviewlens origin/main 대비 이 Segment 변경을 적대적으로 검토해줘.
+$reviewlens Adversarial mode로 Rust 동시성·복구 실패 경로를 검증해줘.
+```
+
+Challenger가 증거를 제시한 가설도 Validator 검증 전에는 확정 결함이 아닙니다. **코드 확인과 실제 테스트 실행을 구분**해 보고하도록 했습니다. 실제 버그 탐지율 평가 방법은 [한국어 평가 가이드](docs/EVALUATION.ko.md)를 참고하세요.
 
 ## 빠른 설치
 
@@ -53,15 +65,20 @@ Claude Code의 네이티브 플러그인과 전용 서브 에이전트를 사용
   General / Standards
   Spec (명세가 있으면)
   Rust + Systems (관련 코드라면)
+  Challenger (Adversarial에서만)
          |
-  중복 Finding 정리
+  후보 Finding 통합
          |
-  중요 Finding 재검증
+  독립 반증 검증 (가능한 경우)
          |
-  증거 중심 리뷰 결과
+  확인된 결함 + 검토 Coverage
 ```
 
 스킬 핵심 파일은 `SKILL.md`, `agents/`의 두 개의 프롬프트 계약, `references/`의 세 문서로 총 **6개**입니다. Claude Code 플러그인 메타데이터와 전용 Agent 어댑터는 별도로 제공됩니다. 별도 서버나 패키지를 실행하지 않습니다.
+
+## v0.2.0 변경사항
+
+6개 핵심 파일은 유지하면서 적대적 Challenger 역할, 불변식/실패 가설 추적, 강화된 Rust·Storage 실패 매트릭스, 검증된 Finding과 미확인 가설의 구분을 추가했습니다. 구조 검증 테스트는 실제 리뷰 탐지율을 증명하지 않습니다.
 
 ## GitHub 게시 (유지보수자 전용)
 

@@ -10,6 +10,8 @@ ReviewLens uses **independently written prompts** informed by review *ideas and 
 | Google Engineering Practices (archived) | Design, functionality, complexity, tests, and code-health review criteria | CC BY 3.0 (documentation) | https://google.github.io/eng-practices/review/reviewer/looking-for.html |
 | obra Superpowers | Providing precise Git scope to a reviewer; critically validating review feedback | Verify upstream per-file licenses before any verbatim reuse | https://github.com/obra/superpowers/tree/main/skills |
 
+**ReviewLens v0.2 additions:** the invariant-first risk brief, bounded independent adversarial Challenger role, falsification ledger, crash/interleaving hypothesis matrix, coverage statuses, and separate detection-quality evaluation process are original ReviewLens adaptations, not claimed as upstream implementations.
+
 **ReviewLens additions:** minimal six-file portable skill organization, conditional selection of Rust/Systems lenses, evidence thresholds for memory/performance, database visibility/durability/recovery checks, policy distinctions (`unwrap`/`expect`, contextual `parking_lot`, repository-specific logging), and bilingual installation documentation.
 
 **ReviewLens license:** MIT applies only to ReviewLens's original material. It is **not** a relicensing of Trail of Bits's CC BY-SA 4.0 text, Google's CC BY 3.0 guide, or NVIDIA's Apache-2.0 implementation. If downstream contributors copy substantial upstream expressive text, they must separately honor the corresponding license and attribution obligations (including ShareAlike where applicable). This file is an attribution of intellectual inspiration, not evidence of official affiliation or approval.

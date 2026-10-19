@@ -14,6 +14,18 @@ Use this for every reviewed change, regardless of language. Examine actual proje
 - **Documentation**: Require changes when documented behavior becomes inaccurate, especially public APIs and operational settings. Do not demand redundant comments.
 - **Observability**: Check existing log/metric conventions, important failure visibility, sensitive-data redaction, and excessive hot-path logging. Preserve the repository's existing logging technology.
 
+## Adversarial contracts (when Challenger is active)
+
+Start by locating the *actual* guarantees in the changed interface. For each relevant contract, seek a counterexample rather than another design opinion:
+
+- **Boundary values and state:** Empty/duplicate/oversized inputs; valid-but-unexpected ordering; state transition from partially initialized to visible; stale snapshots and caches.
+- **Behavior under failure:** Error before/after a side effect; partial commit; retry after ambiguous success; cancellation; rollback that itself fails.
+- **Compatibility:** An older producer/newer consumer pair; backwards-compatible schema or serialized encoding; persisted data from a previous release; previously legal API calls that now behave differently.
+- **Security boundaries:** Authorization is checked at the correct resource/action boundary, not just an upstream handler; identity and tenant context survive nested calls; errors and logs do not leak sensitive fields.
+- **Evidence:** Cite where the precondition is checked (or demonstrably is not), the reachable entry point, and the observable violation. The existence of multiple code paths alone is not a bug.
+
+Do not infer a specification solely because an implementation looks odd. If the contract is an inference, label it **assumed** and seek corroboration.
+
 ## Test quality
 
 - Identify the invariant/contract that could regress, then verify that tests exercise the critical observable behavior.

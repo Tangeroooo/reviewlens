@@ -1,12 +1,17 @@
 {
   "name": "reviewlens-marketplace",
   "description": "ReviewLens code review skill for Claude Code",
-  "owner": { "name": "Tangeroooo" },
+  "owner": {
+    "name": "Tangeroooo"
+  },
   "plugins": [
     {
       "name": "reviewlens",
-      "source": { "source": "github", "repo": "Tangeroooo/reviewlens" },
-      "description": "General + Rust + systems review with evidence-backed findings"
+      "source": {
+        "source": "github",
+        "repo": "Tangeroooo/reviewlens"
+      },
+      "description": "Risk-based general, Rust and systems review with adversarial Challenger and validated findings"
     }
   ]
 }
