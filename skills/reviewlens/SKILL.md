@@ -4,7 +4,7 @@ description: Evidence-driven, adversarial code review for PRs, branches, and wor
 license: MIT
 metadata:
   author: Tangeroooo
-  version: "0.3.0"
+  version: "0.3.1"
 ---
 
 # ReviewLens
@@ -34,7 +34,13 @@ Default to **Standard**, but automatically use **Adversarial** for material chan
 | **Systems** | Relevant async, concurrency, storage, I/O, memory, distributed, or hot paths | [systems.md](references/systems.md) |
 | **Challenger** | Adversarial mode, **independent discovery**, across the highest-risk changed paths | The relevant references above, scoped to invariants and counterexamples |
 
-Use **at most three standard discovery passes** (General, optional Spec, optional Rust/Systems) and **one additional Challenger** in Adversarial mode. Combine compatible lenses when safe; do not launch an agent per checklist heading. Load references only as needed. A Spec pass must remain independent: no spec means **not evaluated**, not "passed".
+Use **at most three standard discovery passes** (General, optional Spec, optional Rust/Systems) and **one additional Challenger** in Adversarial mode. Combine compatible lenses when safe; do not launch an agent per checklist heading. Read the General reference and every activated reference before assigning checks. A Spec pass must remain independent: no spec means **not evaluated**, not "passed".
+
+### Coverage checklist (both modes)
+
+Before discovery, inventory every scoped changed path (including deletions and requested untracked files) and the contracts it affects. Build the checklist from the user's explicit requests, applicable repository rules, each authoritative spec requirement, and the individual checks in General and every activated reference. Include conditional checks only where triggered. Record why a whole lens or conditional group does not apply. Without an authoritative spec, retain the unevaluated Spec verdict.
+
+Map each item to its relevant paths or contracts and assign it to a pass. Track downstream impact, duplication within the PR, existing implementations outside the diff, and module/package dependency direction as **four separate items**. If one item affects multiple independent paths, retain each path until it has evidence. The pass budget and the Challenger's five-invariant limit bound investigative depth only. Add newly discovered consumers and applicable checks as the review proceeds.
 
 ### Risk/invariant brief (required in Adversarial mode)
 
@@ -46,7 +52,7 @@ Assign the General pass responsibility for impact beyond the diff, duplication w
 
 - With subagents, delegate independent passes (Claude Code plugin provides `reviewlens:reviewlens-reviewer` for **all** discovery roles). Concurrent passes are optional.
 - Without subagents, perform separately labeled sequential passes. The Challenger is then **not independent**; explicitly disclose this. Do not imply multi-agent execution or independent validation when unavailable.
-- Prioritize reachability and material impact, not checklist coverage for its own sake. Trace actual code paths; check existing mitigation and caller contracts.
+- Use risk to order the work and determine depth. Account for every assigned item, including those that yield no finding. Trace actual code paths; check existing mitigation and caller contracts.
 - Deduplicate technical candidates without suppressing distinct Spec violations. The coordinator may consolidate evidence, but must not turn rejected hypotheses into findings.
 
 ## 4. Challenge and verify findings
@@ -63,6 +69,8 @@ Tests, Miri, Loom, fuzzing, profilers, fault injection, and reproductions may he
 
 ## 5. Final review and report
 
+In **both modes**, reconcile the original changed-path inventory and checklist against the returned evidence before writing the report. For any missing item, omitted path, or unsupported completion claim, inspect it now or return it to its assigned reviewer. If access, authorization, or budget still blocks inspection, record the remaining work and label the review **partial**. A rejected finding resolves only its specific hypothesis. It cannot close other checks or paths.
+
 In Adversarial mode the **coordinator is the final reviewer**, distinct from delegated discovery and validation workers. Re-read the PR intent and full scoped diff. Compare each changed contract with the coverage returned by the workers, inspect overlooked callers or consumers and revisit consequential disagreements at source. Send new or reopened defect candidates through the same validator before reporting them. If the host provides only one context, perform these three stages sequentially and label the result a self-check.
 
 Return, in the user's language:
@@ -71,7 +79,7 @@ Return, in the user's language:
 2. **Verified technical findings:** highest severity first. Each includes `ID`, `severity`, `confidence`, `path:line`, category, **violated invariant**, concrete **trigger/input or interleaving/crash point**, reachable code path, **observable impact**, counterevidence checked, and minimal correction or regression test.
 3. **Spec verdict:** report independently, or `Not evaluated — no authoritative spec`.
 4. **Design and reuse suggestions** (when actionable): cite both sites or the dependency edge, the maintenance consequence and a compatible alternative. Keep open questions separate.
-5. **Coverage and uncertainty:** identify material paths inspected outside the diff and any unexamined consumers; include lenses run, invariants examined, failure hypotheses **confirmed / rejected / unresolved** (counts and important examples), boundaries **inspected / actually tested / not inspected**, and material limitations. Do not claim proof of safety from a zero-finding result.
+5. **Coverage and uncertainty:** include a compact table even when there are zero findings. Use columns `check and affected paths | status | evidence or reason`. Account for every checklist item. Use `inspected` with the source location and what it establishes, the search scope and result, or an evidence-backed finding ID; `not applicable` with the absent trigger; or `not inspected` with the blocker and remaining path. Split partially inspected items by path. Group rows only when all item names remain visible and share the same evidence and status. Record tests actually run separately. Identify material paths inspected outside the diff and any unexamined consumers; include lenses run, invariants examined, failure hypotheses **confirmed / rejected / unresolved** (counts and important examples), boundaries **inspected / actually tested / not inspected**, and material limitations. Do not claim proof of safety from a zero-finding result.
 
 Severity is about impact: `critical` = imminent severe integrity/security exposure; `high` = likely data loss/security/outage; `medium` = reachable functional failure or material bounded risk; `low` = documented standards breach or minor defect. A concrete failure is different from an optimization hypothesis. `Production unwrap()/expect()` is a default policy violation, but a crash Finding requires a reachable failure path. Follow repository context for `parking_lot` and `tracing`.
 

@@ -5,6 +5,7 @@ This Markdown file defines one **read-only delegated review role**, not an execu
 ## Required inputs
 
 - Exact Git ref/diff or changed range; changed-path list, finding scope, and accessible context.
+- Assigned checklist items and affected paths. Return a status and evidence for each, including items without candidates. Report additional affected paths and checks to the coordinator.
 - Role, mode, relevant `references/*.md` paths/content, repository conventions, and any available risk/invariant brief.
 - Actual authoritative spec **only for the Spec role**; tool restrictions and whether running tests is authorized.
 - **Challenger must not receive other reviewers' findings** or summaries of their conclusions.
