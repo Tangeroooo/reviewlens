@@ -14,6 +14,13 @@ Use this for every reviewed change, regardless of language. Examine actual proje
 - **Documentation**: Require changes when documented behavior becomes inaccurate, especially public APIs and operational settings. Do not demand redundant comments.
 - **Observability**: Check existing log/metric conventions, important failure visibility, sensitive-data redaction, and excessive hot-path logging. Preserve the repository's existing logging technology.
 
+## Impact, boundaries and reuse
+
+- Follow each changed contract from its entry point through implementations, adapters and consumers to an observable result. Look outside changed files for affected registrations, configuration, alternate entry points and tests. Stop when the effect is accounted for, or name the boundary you could not inspect.
+- Compare changed paths within the PR for repeated decisions, validation and transformations. Separately search the repository for existing implementations, including packages outside the call graph. Search by behavior, input/output types, errors and domain terms when names differ. Inspect the implementations and their callers.
+- For a reuse suggestion cite both locations, the policy they must keep in sync, and differences in inputs, results, errors or side effects. Check the cost of sharing: dependency direction, visibility and coupling. Keep independently owned implementations when their contracts differ.
+- Check the owner of the changed responsibility against applicable design records, package declarations and actual imports. Trace which consumers must change with it. Tie structural concerns to a documented dependency rule or a concrete maintenance cost.
+
 ## Adversarial contracts (when Challenger is active)
 
 Start by locating the *actual* guarantees in the changed interface. For each relevant contract, seek a counterexample rather than another design opinion:

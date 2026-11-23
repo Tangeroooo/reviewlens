@@ -15,7 +15,9 @@ ReviewLens는 **Claude Code와 OpenAI Codex**에서 사용할 수 있는 [Agent 
 | **Rust** | Unsafe 불변식, 소유권, FFI, panic, lock, Rust 관용구 | Rust 변경 시 |
 | **Systems** | Async/Cancellation, Backpressure, 메모리 예산, DB 정합성·복구 | 관련 시스템 코드 변경 시 |
 
-일반 변경은 **Standard**(발견용 리뷰 1~3회), `unsafe`·Storage Recovery·인증·동시성 등 고위험 변경은 **Adversarial** 모드로 검토합니다. Adversarial은 독립 **Challenger** 리뷰(서브 에이전트 지원 시)와 모든 실질적 결함 후보의 반증 검증을 추가합니다. Spec 결과와 기술/규칙 검토는 별도로 보고합니다.
+일반 변경은 **Standard**(발견용 리뷰 1~3회), `unsafe`·Storage Recovery·인증·동시성 등 고위험 변경은 **Adversarial** 모드로 검토합니다. Adversarial은 독립 **Challenger** 리뷰(서브 에이전트 지원 시)와 모든 실질적 결함 후보의 반증 검증을 추가합니다.
+
+검증 후 코디네이터가 전체 diff와 누락된 영향 경로를 다시 확인해 최종 리뷰합니다. General 리뷰는 변경 밖의 소비자, PR 내부 중복, 기존 구현의 재사용 가능성을 살핍니다. Rust 리뷰는 crate 의존 방향과 공개 경계도 확인합니다. 설계 제안과 확정 결함, Spec 결과를 구분해 보고합니다.
 
 ### 검토 정책
 
@@ -71,7 +73,9 @@ Claude Code의 네이티브 플러그인과 전용 서브 에이전트를 사용
          |
   독립 반증 검증 (가능한 경우)
          |
-  확인된 결함 + 검토 Coverage
+  코디네이터가 전체 diff와 누락 경로 확인
+         |
+  확정 결함, 설계 제안, 검토 범위
 ```
 
 스킬 핵심 파일은 `SKILL.md`, `agents/`의 두 개의 프롬프트 계약, `references/`의 세 문서로 총 **6개**입니다. Claude Code 플러그인 메타데이터와 전용 Agent 어댑터는 별도로 제공됩니다. 별도 서버나 패키지를 실행하지 않습니다.

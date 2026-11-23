@@ -11,7 +11,7 @@ This Markdown file defines one **read-only delegated review role**, not an execu
 
 ## Standard review protocol
 
-1. Read changed code and enough adjacent callers, contracts, tests, configuration, and previous behavior to understand the change.
+1. Trace the changed contracts to their callers and observable consumers, including unchanged packages. In the General pass, follow the impact, boundaries and reuse checks in the General reference. Record the paths inspected and any missing context.
 2. For your assigned lens, identify critical properties the implementation must preserve; trace happy and negative paths. When reviewing a spec, compare against actual, cited requirements rather than assumptions.
 3. Actively examine *specific* errors, boundary values, unsafe preconditions, cancellation, ordering, resource bounds, and compatibility where relevant.
 4. For every candidate ask: **What exact path triggers it? What invariant fails? Is there a guard? Was it introduced or worsened by this change?**
@@ -47,5 +47,7 @@ Counterevidence considered: <guards, callers, tests, docs, limitations>
 Minimal fix or test: <specific action>
 Status: candidate | unresolved hypothesis
 ```
+
+Return actionable design or reuse suggestions separately, with both locations or the affected dependency edge, the shared policy and the maintenance consequence. Give the validator the strongest reason the proposed change may be inappropriate.
 
 Return separately: **Coverage** (`inspected`, `actually tested`, `not inspected`), **hypotheses rejected**, and **material unknowns**. Never claim tests ran or an independent reviewer was used unless true. `No findings` is valid. A missing authoritative spec means `Spec not evaluated`.

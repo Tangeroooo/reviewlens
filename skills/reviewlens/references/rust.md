@@ -2,6 +2,10 @@
 
 Use for changed Rust code. Combine the language-safety emphasis inspired by Trail of Bits with practical Rust guidance inspired by NVIDIA Switchyard. The checklist is **risk-directed**: establish real paths and invariants, not syntax-pattern violations alone.
 
+## Workspace, crate and module boundaries
+
+For changed code or manifests, identify the owning crate and its consumers. Read workspace and member `Cargo.toml` files together with imports: a shared workspace dependency declaration alone does not create an edge. Distinguish normal, build, dev and feature-gated dependencies that affect the reviewed path. Trace `pub` visibility and re-exports to downstream users. Before proposing reuse across crates, check whether it would invert an established layer, introduce a cycle, expose an internal type, or activate an unnecessary feature. Cite the concrete edge and affected API.
+
 ## Safety and representation
 
 - **Ownership/lifetimes:** Are borrowed values valid through all uses? Does shared ownership unintentionally retain large objects? Inspect self-referential patterns, pins, interior mutability, and lifetime assumptions at FFI boundaries.
