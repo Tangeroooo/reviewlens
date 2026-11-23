@@ -36,7 +36,7 @@ class ReviewLensDistributionTest(unittest.TestCase):
         self.assertRegex(fm, r"(?m)^name: reviewlens$")
         self.assertRegex(fm, r"(?m)^description: .{50,}$")
         self.assertRegex(fm, r"(?m)^license: MIT$")
-        self.assertRegex(fm, r"(?m)^  version: \"0\.2\.0\"$")
+        self.assertRegex(fm, r"(?m)^  version: \"\d+\.\d+\.\d+\"$")
         self.assertLessEqual(len((SKILL / "SKILL.md").read_text().splitlines()), 500)
 
     def test_claude_agent_adapters(self):
@@ -52,7 +52,7 @@ class ReviewLensDistributionTest(unittest.TestCase):
         plugin = json.loads((ROOT / ".claude-plugin/plugin.json").read_text())
         market = json.loads((ROOT / ".claude-plugin/marketplace.json").read_text())
         self.assertEqual(plugin["name"], "reviewlens")
-        self.assertEqual(plugin["version"], "0.2.0")
+        self.assertIn(f'  version: "{plugin["version"]}"', frontmatter(SKILL / "SKILL.md").splitlines())
         self.assertEqual(market["name"], "reviewlens-marketplace")
         self.assertEqual(len(market["plugins"]), 1)
         self.assertEqual(market["plugins"][0]["name"], plugin["name"])
@@ -109,6 +109,17 @@ class ReviewLensDistributionTest(unittest.TestCase):
         for phrase in ("Challenger protocol", "falsifiable counterexample", "disconfirming evidence",
                        "hypothesis ledger", "No findings"):
             self.assertIn(phrase.lower(), worker.lower())
+
+    def test_final_reviewer_and_scope_contracts(self):
+        skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        general = (SKILL / "references/general.md").read_text(encoding="utf-8")
+        rust = (SKILL / "references/rust.md").read_text(encoding="utf-8")
+        self.assertIn("coordinator is the final reviewer", skill)
+        self.assertIn("new or reopened defect candidates", skill)
+        self.assertIn("within the PR", general)
+        self.assertIn("outside the call graph", general)
+        self.assertIn("Cargo.toml", rust)
+        self.assertIn("re-exports", rust)
 
     def test_falsification_and_uncertainty_gate(self):
         skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")

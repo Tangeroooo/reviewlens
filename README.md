@@ -15,7 +15,9 @@ ReviewLens is a portable [Agent Skill](https://agentskills.io/specification) for
 | **Rust** | Unsafe invariants, ownership/FFI, panic policy, locks, idiomatic Rust | For Rust changes |
 | **Systems** | Async cancellation, bounded memory/backpressure, data visibility, durability/recovery | For relevant systems/storage changes |
 
-**Standard** uses 1–3 bounded discovery passes. **Adversarial** adds one *independent Challenger* to challenge assumptions with concrete failure scenarios (when subagents exist), followed by verification of every substantive candidate defect. High-risk changes (unsafe/FFI, storage recovery, atomic ordering, authentication, cancellation, etc.) automatically select Adversarial; you can request it explicitly for any diff. The coordinator keeps Spec results separate from Standards/Technical results. A standalone skill falls back to clearly labeled single-agent passes if delegation is unavailable.
+**Standard** uses 1–3 bounded discovery passes. **Adversarial** adds one *independent Challenger* to challenge assumptions with concrete failure scenarios (when subagents exist), followed by verification of every substantive candidate defect. High-risk changes (unsafe/FFI, storage recovery, atomic ordering, authentication, cancellation, etc.) automatically select Adversarial; you can request it explicitly for any diff.
+
+The coordinator performs final review of the full diff and coverage gaps after validation. The General pass traces consumers beyond the diff and checks both new duplication and existing reusable code. Rust reviews also inspect crate dependencies and public boundaries. Actionable design suggestions are reported separately from defects. The coordinator keeps Spec results separate from Standards/Technical results. A standalone skill falls back to clearly labeled single-agent passes if delegation is unavailable.
 
 ReviewLens is **read-only** by default. It is not a static analyzer and makes no promise to discover every bug.
 
@@ -75,6 +77,8 @@ Scope + repository conventions + optional authoritative spec
     +-- Rust + Systems (when relevant) ------------+            |
     +-- Challenger (adversarial mode only) ---------+            |
                                                          independent validator
+                                                               |
+                                                coordinator checks diff and gaps
                                                                |
                                                    evidence + coverage report
 ```

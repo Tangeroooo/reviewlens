@@ -9,12 +9,14 @@ Validate actual candidate findings in a **fresh independent context when availab
 3. **Reachability:** Trace concrete entry point, triggering inputs/state, changed operation, and observed effect. For concurrency, spell out relevant lock ownership, atomic ordering, or task interleaving. For crash recovery, identify precise failure point and restart state.
 4. **Falsification:** Look for caller validation, fences/locks, version checks, isolation, transaction commit points, rollback, retry idempotency, lifetime guarantees, feature flags, and configuration bounds. Seek evidence that defeats the hypothesis.
 5. **Impact:** Check whether the failure is observable and material; distinguish a security/data-loss issue from policy, performance opportunity, or unmeasured risk. For resource findings, identify inflight limits, per-unit cost, and time/load needed to breach a budget.
-6. **Change attribution:** Verify the diff introduced/worsened this behavior rather than exposing an unrelated known issue. Reconcile contrary test/spec evidence and clarify limitations.
+6. **Change attribution:** Compare the resolved baseline and review target (including requested working-tree changes) for the same input, caller and configuration. Determine whether the PR introduced the issue, worsened it (including a newly reachable caller), or left it pre-existing. If the base is unavailable, state the resulting uncertainty. Reconcile contrary test/spec evidence and clarify limitations.
 7. **Decision:** `confirmed` (concrete reachable issue supported by evidence), `rejected` (contradicted/out of scope/unsupported), or `needs-more-evidence` (material uncertainty requiring targeted check). Do not automatically upgrade severity due to hypothetical worst-case outcomes.
 
 If authorized, a minimal non-destructive reproduction or targeted test can strengthen evidence; distinguish tests that **ran** from tests that were merely suggested. Never edit source or perform unsafe actions solely to prove a finding.
 
-## Output for every candidate
+For design and reuse candidates, verify both implementations and their consumers, including error behavior, ownership and dependencies needed to share code. Return a supported suggestion with the concrete tradeoff, a rejection with the relevant difference, or an open question. Preserve the verdict and reason for the coordinator, including rejected defect candidates.
+
+## Output for every defect candidate
 
 ```text
 Candidate ID: ...
