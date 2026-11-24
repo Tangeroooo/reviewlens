@@ -1,10 +1,10 @@
 ---
 name: reviewlens
-description: Evidence-driven, adversarial code review for PRs, branches, and working-tree diffs. Traces cross-package impact, checks module boundaries and reuse, and reviews correctness and requirements; adds Rust safety and systems/database lenses when relevant. Challenges invariants, failure paths, and assumptions in risky changes, then independently verifies candidate defects. Use for rigorous PR, diff, implementation, Rust, concurrency, or storage reviews; not for writing features.
+description: Evidence-driven, adversarial code review for PRs, branches, and working-tree diffs. Traces cross-package impact, checks module boundaries and reuse, and reviews correctness, requirements, and performance regressions; adds Rust safety and systems/database lenses when relevant. Challenges invariants, failure paths, and assumptions in risky changes, then independently verifies candidate defects. Use for rigorous PR, diff, implementation, Rust, concurrency, or storage reviews; not for writing features.
 license: MIT
 metadata:
   author: Tangeroooo
-  version: "0.3.1"
+  version: "0.4.0"
 ---
 
 # ReviewLens
@@ -29,18 +29,21 @@ Default to **Standard**, but automatically use **Adversarial** for material chan
 | Lens | Activation | Reference |
 | --- | --- | --- |
 | **General / Standards** | Every diff | [general.md](references/general.md) |
+| **Performance** | Every diff is screened; activate for changed work, I/O, reuse, resource lifetime, or scheduling in any language | [performance.md](references/performance.md) |
 | **Spec** | Only with an authoritative user/spec/issue/ADR source | [general.md](references/general.md) |
 | **Rust** | Rust changes; standalone or combined for small diffs | [rust.md](references/rust.md) |
 | **Systems** | Relevant async, concurrency, storage, I/O, memory, distributed, or hot paths | [systems.md](references/systems.md) |
 | **Challenger** | Adversarial mode, **independent discovery**, across the highest-risk changed paths | The relevant references above, scoped to invariants and counterexamples |
 
-Use **at most three standard discovery passes** (General, optional Spec, optional Rust/Systems) and **one additional Challenger** in Adversarial mode. Combine compatible lenses when safe; do not launch an agent per checklist heading. Read the General reference and every activated reference before assigning checks. A Spec pass must remain independent: no spec means **not evaluated**, not "passed".
+Use **at most three standard discovery passes** (General, optional Spec, optional combined technical lenses) and **one additional Challenger** in Adversarial mode. Combine compatible lenses when safe; do not launch an agent per checklist heading. Read the General reference and every activated reference before assigning checks. A Spec pass must remain independent: no spec means **not evaluated**, not "passed".
+
+General owns the **performance applicability screen for every changed path**, including bug fixes and safety improvements. Load the Performance reference when a path changes repeated computation, batching, external operations, processed data, resource lifetime, or scheduling; uncertainty requires tracing, not dismissal. Record evidence when no cost-relevant behavior changes. Assign applicable P1–P8 checks to General or an existing technical pass (combine Rust/Systems/Performance as needed), without adding an agent per lens or dropping existing checks. Performance is independent of Systems activation and the PR title.
 
 ### Coverage checklist (both modes)
 
 Before discovery, inventory every scoped changed path (including deletions and requested untracked files) and the contracts it affects. Build the checklist from the user's explicit requests, applicable repository rules, each authoritative spec requirement, and the individual checks in General and every activated reference. Include conditional checks only where triggered. Record why a whole lens or conditional group does not apply. Without an authoritative spec, retain the unevaluated Spec verdict.
 
-Map each item to its relevant paths or contracts and assign it to a pass. Track downstream impact, duplication within the PR, existing implementations outside the diff, and module/package dependency direction as **four separate items**. If one item affects multiple independent paths, retain each path until it has evidence. The pass budget and the Challenger's five-invariant limit bound investigative depth only. Add newly discovered consumers and applicable checks as the review proceeds.
+Map each item to its relevant paths or contracts and assign it to a pass. Track downstream impact, duplication within the PR, existing implementations outside the diff, and module/package dependency direction as **four separate items**. If one item affects multiple independent paths, retain each path until it has evidence. The pass budget and the Challenger's five-invariant limit bound investigative depth only. Add newly discovered consumers and applicable checks as the review proceeds. For Performance, retain P1–P8 separately by affected path and require baseline/target cost evidence, workload, reuse/safety boundaries, and execution status. A correctness pass or one inspected caller cannot close performance checks on other consumers.
 
 ### Risk/invariant brief (required in Adversarial mode)
 
@@ -59,8 +62,9 @@ Assign the General pass responsibility for impact beyond the diff, duplication w
 
 Read [agents/validator.md](agents/validator.md). Prefer the independent `reviewlens:reviewlens-validator` Claude agent when available; otherwise clearly label a self-check.
 
-- **Standard:** validate all critical/high and uncertain medium candidates. Verify policy-only issues directly against source and repo standards.
-- **Adversarial:** validate **every substantive behavior/security/correctness candidate, including low severity**. Simple documented policy violations may be source-checked without a separate agent. Deduplicate first without dropping distinct trigger/impact paths.
+- **Standard:** validate all critical/high and uncertain medium candidates, plus every performance defect candidate regardless of severity. Verify policy-only issues directly against source and repo standards.
+- **Adversarial:** validate **every substantive behavior/security/correctness/performance candidate, including low severity**. Simple documented policy violations may be source-checked without a separate agent. Deduplicate first without dropping distinct trigger/impact paths.
+- Supply performance candidates with [performance.md](references/performance.md) and their cost evidence. Distinguish proven work amplification, measured latency, necessary safety costs, and unverified optimization ideas. Never require weakening correctness, security, or durability to recover baseline speed.
 - The validator actively **tries to disprove** each candidate using actual guards, invariants, configuration, callers, compensating actions, and execution ordering. Explicitly classify `confirmed`, `rejected`, or `needs-more-evidence`.
 - Validate actionable design/reuse suggestions against their cited sites and contracts. Keep them separate from defect counts. Return rejected candidates and reasons to the coordinator as well.
 - Never report `needs-more-evidence` as confirmed. A high-impact *unverified* path may appear as a clearly marked coverage limitation or follow-up test, **not** a proven defect.
@@ -76,11 +80,12 @@ In Adversarial mode the **coordinator is the final reviewer**, distinct from del
 Return, in the user's language:
 
 1. **Scope / mode:** base SHA or worktree, changed paths, repo/spec material, selected mode and why; actual reviewer/subagent use and tests executed.
-2. **Verified technical findings:** highest severity first. Each includes `ID`, `severity`, `confidence`, `path:line`, category, **violated invariant**, concrete **trigger/input or interleaving/crash point**, reachable code path, **observable impact**, counterevidence checked, and minimal correction or regression test.
+2. **Verified technical findings:** highest severity first. Each includes `ID`, `severity`, `confidence`, `path:line`, category, **violated invariant** (or demonstrated cost regression for Performance), concrete **trigger/input or interleaving/crash point**, reachable code path, **observable impact**, counterevidence checked, and minimal correction or regression test.
+   Performance findings also include the same-workload base → target work, safety/reuse boundary, and whether impact was source-derived, counted in an executed check, or timed.
 3. **Spec verdict:** report independently, or `Not evaluated — no authoritative spec`.
 4. **Design and reuse suggestions** (when actionable): cite both sites or the dependency edge, the maintenance consequence and a compatible alternative. Keep open questions separate.
 5. **Coverage and uncertainty:** include a compact table even when there are zero findings. Use columns `check and affected paths | status | evidence or reason`. Account for every checklist item. Use `inspected` with the source location and what it establishes, the search scope and result, or an evidence-backed finding ID; `not applicable` with the absent trigger; or `not inspected` with the blocker and remaining path. Split partially inspected items by path. Group rows only when all item names remain visible and share the same evidence and status. Record tests actually run separately. Identify material paths inspected outside the diff and any unexamined consumers; include lenses run, invariants examined, failure hypotheses **confirmed / rejected / unresolved** (counts and important examples), boundaries **inspected / actually tested / not inspected**, and material limitations. Do not claim proof of safety from a zero-finding result.
 
-Severity is about impact: `critical` = imminent severe integrity/security exposure; `high` = likely data loss/security/outage; `medium` = reachable functional failure or material bounded risk; `low` = documented standards breach or minor defect. A concrete failure is different from an optimization hypothesis. `Production unwrap()/expect()` is a default policy violation, but a crash Finding requires a reachable failure path. Follow repository context for `parking_lot` and `tracing`.
+Severity is about impact: `critical` = imminent severe integrity/security exposure; `high` = likely data loss/security/outage; `medium` = reachable functional failure or material bounded risk; `low` = documented standards breach or minor defect. A concrete failure or demonstrated material cost regression is different from an optimization hypothesis. Grade performance by supported resource/latency/throughput impact, not by the presence of a loop or cache opportunity. `Production unwrap()/expect()` is a default policy violation, but a crash Finding requires a reachable failure path. Follow repository context for `parking_lot` and `tracing`.
 
 **Finding quality gate:** If the alleged trigger, path, missing guard, or impact cannot be substantiated, reject or mark the hypothesis unresolved. Be relentless in searching for counterexamples, restrained in reporting defects. No padding with style opinions, arbitrary test quotas, or invented benchmarks.

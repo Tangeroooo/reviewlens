@@ -20,6 +20,25 @@ Use separate, blind reviews for both variants of each pair. Keep the answer key 
 
 Record confirmed defects, actionable design suggestions, false positives on controls, and cross-package paths inspected. Track the time and token cost. For each unique finding added or rejected at final review, record whether adjudication supports that decision.
 
+## Performance regression/control pairs
+
+Evaluate Performance across languages and applications, independently of Systems activation. Use the same frozen inputs to compare the previous skill and the candidate in each mode; keep model, tools, budget, and other checks fixed. Track existing correctness findings as well as performance detection so added coverage cannot hide losses elsewhere.
+
+| Case | Change with an issue | Control change | What counts as a useful finding |
+| --- | --- | --- | --- |
+| Fragmented batches | A validation fix evaluates each valid run separately, rebuilding the same parser or regex for every run. | Preparation is shared within a valid scope; excluded records still cannot raise errors. | Count setup calls under scattered and contiguous exclusions, and preserve the validation guarantee. |
+| Web/API fan-out | A page replaces one bulk lookup with an awaited remote read for each displayed item. | A bounded bulk read preserves per-item authorization and result order. | Trace actual backend calls and waits through the adapter; do not bypass authorization. |
+| Repeated parsing | An importer reparses a constant format or the same immutable document for each consumer. | Preparation/document reuse is scoped by input identity and options, with bounded lifetime. | Identify duplicate work and its valid reuse scope; reject cross-user or stale reuse. |
+| File/cache cleanup | Removing each matched object rescans and clones the whole registry. | A bounded selection pass preserves active users and replacement identities, with disposal outside the lock. | Show the product of removals and registry size, copying, and contention without breaking lifetime safety. |
+| Serial persistence | Independent already-durable items are reread and verified sequentially on every request despite an equivalent pinned proof. | Fresh verification or a persistence barrier is required by the actual acknowledgement contract. | Distinguish unnecessary repeated work from required freshness/durability; do not recommend weaker guarantees. |
+| Lifetime and selectivity | A small selected result now retains a huge backing buffer, or all payloads are decoded before a selective filter. | A bounded copy or selective decode preserves errors, ordering, and resource limits. | Explain reachable bytes/lifetime, including concurrent requests and fallback paths. |
+
+Freeze base/head, realistic workload dimensions, required semantics, and expected cost evidence for each case before review. Include tiny/bounded inputs, necessary safety costs, and explicit accepted tradeoffs as negative controls. Check clean outcomes as carefully as positive findings; a loop, allocation, cache miss, or missing benchmark alone is not a defect.
+
+Prefer reproducible operation/byte/allocation counts where they capture the mechanism. For performance-only mutations that preserve output and counts (such as losing vectorization), use authorized controlled timing or mark them unmeasured. Record measured refs and distinguish local kernels from end-to-end behavior. No universal QPS or timing threshold is implied.
+
+Score P1–P8 coverage per independent path, correctness retention, performance recall, false positives on controls, and review cost. Separate source-derived amplification, executed counts, and measured timing. Synthetic smoke cases establish protocol behavior only; these case designs are not completed benchmarks or evidence of improved real-world recall.
+
 ## Run a controlled comparison
 
 For every identical case:

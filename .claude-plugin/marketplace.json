@@ -11,7 +11,7 @@
         "source": "github",
         "repo": "Tangeroooo/reviewlens"
       },
-      "description": "Risk-based general, Rust and systems review with adversarial Challenger and validated findings"
+      "description": "General, performance, Rust and systems review with adversarial Challenger and validated findings"
     }
   ]
 }

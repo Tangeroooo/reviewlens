@@ -14,6 +14,10 @@ Use this for every reviewed change, regardless of language. Examine actual proje
 - **Documentation**: Require changes when documented behavior becomes inaccurate, especially public APIs and operational settings. Do not demand redundant comments.
 - **Observability**: Check existing log/metric conventions, important failure visibility, sensitive-data redaction, and excessive hot-path logging. Preserve the repository's existing logging technology.
 
+## Performance applicability
+
+For every changed path, determine whether work frequency, batching, processed data, external operations, reuse, lifetime, or scheduling changes. Include unchanged callers of modified helpers and new defaults/configuration. Bug-fix or safety intent does not exempt a path. Activate [Performance](performance.md) when triggered, independently of language or Systems applicability; return evidence for applicability and assigned checks. If uncertain, trace the operation rather than marking it inapplicable.
+
 ## Impact, boundaries and reuse
 
 - Follow each changed contract from its entry point through implementations, adapters and consumers to an observable result. Look outside changed files for affected registrations, configuration, alternate entry points and tests. Stop when the effect is accounted for, or name the boundary you could not inspect.
