@@ -117,7 +117,7 @@ For low-risk changes, Standard is the default. In Adversarial mode, ReviewLens a
 
 - **Skill not found:** verify `SKILL.md` is immediately inside the `reviewlens` directory, not `reviewlens/reviewlens/SKILL.md`; restart if needed.
 - **No subagent delegation:** the platform may not expose subagent tools. ReviewLens falls back to separate single-agent passes and must disclose that in its report. Only the Claude native plugin bundles pre-registered named agents.
-- **No requirements source:** the Spec lens is skipped and marked `not evaluated`; General/Rust/Systems review still runs.
+- **No requirements source:** the Spec lens is skipped and marked `not evaluated`; General and applicable Performance/Rust/Systems review still runs.
 - **No diff/base:** specify a Git base or show uncommitted changes. The skill must not guess a comparison point.
 - **Review permissions:** only grant the coding agent repository read access necessary to inspect code. ReviewLens instructs read-only behavior, but agent permissions are controlled by the host. Review external skill files before allowing shell access.
 - **Duplicate Claude entries:** remove either standalone or plugin installation.

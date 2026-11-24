@@ -20,7 +20,7 @@ Read this only for changes affecting runtime scheduling, concurrent work, perfor
 - **Lifecycle/cache:** Check segment state machine transitions, pin/unpin, cache eviction, mmap lifetime, remote/local tier transitions, close/unload with active readers, generation fences, and GC safety.
 - **Query correctness:** Verify filtering, projection, delete/update visibility, ordering, pagination, cancellation of distributed scans, limits, and planner/executor semantic alignment. Prefer functional counterexamples to algorithmic opinions.
 - **Concurrency/operations:** Check bounded in-flight RPCs, pool exhaustion, queue growth, metadata/cache invalidation, partition moves, partial replica failures, and concurrent migrations.
-- **Performance:** Separate correctness from advice. Review meaningful complexity, batching, copying, lock contention, disk/network amplification, locality, resource budgets, and p99 risks with explicit workloads and available measurements.
+- **Performance:** Use [Performance](performance.md) for cost comparison and P1–P8 coverage across all affected paths, including non-storage callers. Connect amplification and contention to the consistency, durability, cancellation, and backpressure guarantees above; do not trade those guarantees away for speed.
 
 ## Failure matrix (Adversarial mode; only affected dimensions)
 

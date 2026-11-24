@@ -13,6 +13,7 @@ SKILL = ROOT / "skills" / "reviewlens"
 CORE = [
     "SKILL.md", "agents/reviewer.md", "agents/validator.md",
     "references/general.md", "references/rust.md", "references/systems.md",
+    "references/performance.md",
 ]
 
 
@@ -25,11 +26,12 @@ def frontmatter(path):
 
 
 class ReviewLensDistributionTest(unittest.TestCase):
-    def test_all_six_core_files_present(self):
+    def test_all_core_files_present(self):
         for item in CORE:
             with self.subTest(file=item):
                 self.assertTrue((SKILL / item).is_file(), f"missing {item}")
-        self.assertEqual(len(CORE), 6)
+        self.assertEqual(set(CORE), {path.relative_to(SKILL).as_posix()
+                                     for path in SKILL.rglob("*.md")})
 
     def test_agent_skill_frontmatter(self):
         fm = frontmatter(SKILL / "SKILL.md")
@@ -66,6 +68,17 @@ class ReviewLensDistributionTest(unittest.TestCase):
                     continue
                 with self.subTest(source=str(path.relative_to(ROOT)), target=dest):
                     self.assertTrue((path.parent / dest.split("#")[0]).exists(), dest)
+
+    def test_all_lens_references_are_routed_and_packaged(self):
+        coordinator = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        adapter = (ROOT / "agents/reviewlens-reviewer.md").read_text(encoding="utf-8")
+        routed = set(re.findall(r"\]\((references/[^)#]+\.md)\)", coordinator))
+        references = {path.relative_to(SKILL).as_posix() for path in (SKILL / "references").glob("*.md")}
+        self.assertEqual(routed, references)
+        for reference in references:
+            with self.subTest(reference=reference):
+                self.assertIn(reference, CORE)
+                self.assertIn(f"`{Path(reference).name}`", adapter)
 
     def test_source_and_licenses(self):
         text = (ROOT / "docs/SOURCES.md").read_text(encoding="utf-8")
@@ -215,8 +228,9 @@ class ReviewLensDistributionTest(unittest.TestCase):
             for location in (".claude/skills", ".agents/skills"):
                 target = root / location / "reviewlens"
                 shutil.copytree(SKILL, target)
-                self.assertTrue((target / "SKILL.md").exists())
-                self.assertTrue((target / "references/rust.md").exists())
+                for item in CORE:
+                    with self.subTest(location=location, file=item):
+                        self.assertEqual((target / item).read_bytes(), (SKILL / item).read_bytes())
                 self.assertRegex(frontmatter(target / "SKILL.md"), r"(?m)^name: reviewlens$")
 
 

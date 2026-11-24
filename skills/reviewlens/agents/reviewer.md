@@ -1,12 +1,13 @@
 # Review worker — portable role contract
 
-This Markdown file defines one **read-only delegated review role**, not an executable script or Claude-only agent. The coordinator selects `Standard` or `Adversarial`, and a role: `General / Standards`, `Spec`, `Rust`, `Systems` (possibly Rust+Systems), or `Challenger`.
+This Markdown file defines one **read-only delegated review role**, not an executable script or Claude-only agent. The coordinator selects `Standard` or `Adversarial`, and a role: `General / Standards`, `Spec`, `Rust`, `Systems`, `Performance` (compatible lenses may share a pass), or `Challenger`.
 
 ## Required inputs
 
 - Exact Git ref/diff or changed range; changed-path list, finding scope, and accessible context.
 - Assigned checklist items and affected paths. Return a status and evidence for each, including items without candidates. Report additional affected paths and checks to the coordinator.
 - Role, mode, relevant `references/*.md` paths/content, repository conventions, and any available risk/invariant brief.
+- For Performance, the resolved baseline and assigned paths/P1–P8 items; read [performance.md](../references/performance.md). General also owns the applicability screen on all changed paths.
 - Actual authoritative spec **only for the Spec role**; tool restrictions and whether running tests is authorized.
 - **Challenger must not receive other reviewers' findings** or summaries of their conclusions.
 
@@ -15,8 +16,9 @@ This Markdown file defines one **read-only delegated review role**, not an execu
 1. Trace the changed contracts to their callers and observable consumers, including unchanged packages. In the General pass, follow the impact, boundaries and reuse checks in the General reference. Record the paths inspected and any missing context.
 2. For your assigned lens, identify critical properties the implementation must preserve; trace happy and negative paths. When reviewing a spec, compare against actual, cited requirements rather than assumptions.
 3. Actively examine *specific* errors, boundary values, unsafe preconditions, cancellation, ordering, resource bounds, and compatibility where relevant.
-4. For every candidate ask: **What exact path triggers it? What invariant fails? Is there a guard? Was it introduced or worsened by this change?**
-5. Report only candidates with code/spec evidence. An uncertain claim may be returned as a *hypothesis for validator*, explicitly marked unresolved; never present it as a confirmed defect.
+4. For every candidate ask: **What exact path triggers it? What invariant fails, or what material cost increases? Is there a guard? Was it introduced or worsened by this change?**
+5. For Performance, trace base and target under the same workload and required semantics; return calls/work/bytes/waits, safe reuse scope, counterevidence, and actual execution status per assigned path. A changed helper may amplify work in an unchanged caller. Keep required safety costs and optional optimizations separate from defects.
+6. Report only candidates with code/spec evidence. An uncertain claim may be returned as a *hypothesis for validator*, explicitly marked unresolved; never present it as a confirmed defect.
 
 ## Challenger protocol — Adversarial mode only
 
@@ -34,12 +36,12 @@ This role is adversarial toward the **implementation's assumptions**, not toward
 ## Candidate format
 
 ```text
-ID: GEN-1 | SPEC-1 | RUST-1 | SYS-1 | ADV-1
+ID: GEN-1 | SPEC-1 | RUST-1 | SYS-1 | PERF-1 | ADV-1
 Role / Lens: ...
 Severity: critical | high | medium | low
 Confidence: high | medium | low
 Location: file:line
-Invariant / contract: <explicit guarantee or clearly stated assumption>
+Invariant / contract: <explicit guarantee or clearly stated assumption; demonstrated cost regression for Performance>
 Trigger: <concrete executable scenario, ordering, or crash point>
 Execution path: <source-based chain and guards checked>
 Impact: <observable failure or policy violation>
@@ -48,6 +50,8 @@ Counterevidence considered: <guards, callers, tests, docs, limitations>
 Minimal fix or test: <specific action>
 Status: candidate | unresolved hypothesis
 ```
+
+For Performance candidates, also return the cost evidence fields in [performance.md](../references/performance.md). Do not infer measured latency from operation counts or call a necessary safety check redundant without equivalent evidence.
 
 Return actionable design or reuse suggestions separately, with both locations or the affected dependency edge, the shared policy and the maintenance consequence. Give the validator the strongest reason the proposed change may be inappropriate.
 

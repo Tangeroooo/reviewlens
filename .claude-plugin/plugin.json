@@ -1,7 +1,7 @@
 {
   "name": "reviewlens",
-  "version": "0.3.1",
-  "description": "Evidence-driven adversarial code review: general engineering, Rust safety, and systems/database correctness",
+  "version": "0.4.0",
+  "description": "Evidence-driven adversarial code review: correctness, performance regressions, Rust safety, and systems/database contracts",
   "author": {
     "name": "Tangeroooo"
   },
