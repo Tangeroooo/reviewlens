@@ -5,7 +5,7 @@ This Markdown file defines one **read-only delegated review role**, not an execu
 ## Required inputs
 
 - Exact Git ref/diff or changed range; changed-path list, finding scope, and accessible context.
-- Assigned checklist items and affected paths. Return a status and evidence for each, including items without candidates. Report additional affected paths and checks to the coordinator.
+- Pre-discovery checklist records: item/source ID, independent affected path/contract, requirement, assigned pass, applicability, and intended investigation extent. Return every assigned record, including inapplicable items and items without candidates. Report newly discovered paths/checks without dropping original records.
 - Role, mode, relevant `references/*.md` paths/content, repository conventions, and any available risk/invariant brief.
 - For Performance, the resolved baseline and assigned paths/P1–P8 items; read [performance.md](../references/performance.md). General also owns the applicability screen on all changed paths.
 - Actual authoritative spec **only for the Spec role**; tool restrictions and whether running tests is authorized.
@@ -61,3 +61,7 @@ Return actionable design or reuse suggestions separately, with both locations or
 Return separately: **Coverage** (`inspected`, `actually tested`, `not inspected`), **hypotheses rejected**, and **material unknowns**. Never claim tests ran or an independent reviewer was used unless true. `No findings` is valid. A missing authoritative spec means `Spec not evaluated`.
 
 Return concrete test-gap advisories separately from defect candidates: changed contract, missing scenario, inspected tests, regression risk, and minimal test direction. Do not assign runtime severity solely for absent tests. Attach regression-test directions to existing defects without duplicate missing-test candidates. Explicit policy/spec violations remain eligible findings under their respective lenses.
+
+## Mandatory coverage handoff (all roles)
+
+Use the coordinator's record IDs and coverage schema in [SKILL.md](../SKILL.md). For every assigned item return `inspected`, `partial`, `not inspected`, or `not applicable`, with evidence/result, actual investigation extent, unexamined boundaries and reasons, and separate execution status. Do not drop items that yielded no finding or that could not be performed. Do not close independent paths under one aggregate row. For broad checks, name searched packages/directories, exclusions, queries/discovery method, matches actually inspected, traced callers/consumers and stopping boundaries. Compare actual breadth against intended breadth; a sample is not exhaustive inspection. For each performance path, retain P1–P8 and its own base/target and workload evidence. Do not retroactively claim an unrecorded check was completed.

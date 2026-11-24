@@ -35,3 +35,5 @@ Minimal correction or falsifying test: ...
 ```
 
 The final report includes **only confirmed issues** as findings. Put unresolved candidates under **coverage limitations / checks still needed** rather than silently discarding them or reporting them as proven defects. The coordinator may deduplicate confirmed technical findings; preserve separate Spec judgments and materially different failure triggers.
+
+Return the candidate's associated checklist record IDs and the actual validation extent: source paths/consumers/scenarios inspected, excluded or inaccessible boundaries and why, and tools/tests actually executed. Confirmation or rejection resolves only that candidate's hypothesis; it cannot close a broader checklist item without evidence for the remaining scope. No candidate requiring validation is a valid reason for no validator invocation.

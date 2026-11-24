@@ -43,7 +43,7 @@ claude plugin marketplace add Tangeroooo/reviewlens
 claude plugin install reviewlens@reviewlens-marketplace
 ```
 
-Then invoke `/reviewlens:reviewlens Review this PR.`. This method also provides the namespaced `reviewlens-reviewer` and `reviewlens-validator` subagents. Their use is conditional; normal reviews do **not** require a fixed number of agents.
+Then invoke `/reviewlens:reviewlens Review this PR.`. This method also provides the namespaced `reviewlens-reviewer`, `reviewlens-validator`, and `reviewlens-coverage-auditor` subagents. Coverage auditing runs in both modes even with no findings; defect validation depends on candidates. When delegation is unavailable, disclose a self-audit; normal reviews do **not** require a fixed number of agents.
 
 **Do not install both Option A and B into Claude Code unless you intentionally want duplicate skills.** If you already use Option A for Codex, you can use Option B for Claude Code and install Option A **only for Codex**:
 

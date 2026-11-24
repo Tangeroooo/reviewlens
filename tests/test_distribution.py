@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "skills" / "reviewlens"
 CORE = [
-    "SKILL.md", "agents/reviewer.md", "agents/validator.md",
+    "SKILL.md", "agents/reviewer.md", "agents/validator.md", "agents/coverage-auditor.md",
     "references/general.md", "references/rust.md", "references/systems.md",
     "references/performance.md",
 ]
@@ -42,7 +42,7 @@ class ReviewLensDistributionTest(unittest.TestCase):
         self.assertLessEqual(len((SKILL / "SKILL.md").read_text().splitlines()), 500)
 
     def test_claude_agent_adapters(self):
-        for name in ("reviewlens-reviewer", "reviewlens-validator"):
+        for name in ("reviewlens-reviewer", "reviewlens-validator", "reviewlens-coverage-auditor"):
             with self.subTest(name=name):
                 fm = frontmatter(ROOT / "agents" / f"{name}.md")
                 self.assertIn(f"name: {name}", fm)
@@ -111,8 +111,8 @@ class ReviewLensDistributionTest(unittest.TestCase):
         self.assertIn("do not provide other reviewers' candidate findings", skill)
         self.assertIn("Challenger must not receive other reviewers' findings", worker)
         self.assertIn("Challenger", native)
-        self.assertEqual(len(list((ROOT / "agents").glob("*.md"))), 2,
-                         "Reuse the existing reviewer adapter; no new agent definition")
+        self.assertEqual({path.stem for path in (ROOT / "agents").glob("*.md")},
+                         {"reviewlens-reviewer", "reviewlens-validator", "reviewlens-coverage-auditor"})
 
     def test_invariant_first_and_counterexample_contract(self):
         skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
@@ -228,7 +228,7 @@ class ReviewLensDistributionTest(unittest.TestCase):
             for location in (".claude/skills", ".agents/skills"):
                 target = root / location / "reviewlens"
                 shutil.copytree(SKILL, target)
-                for item in CORE:
+                for item in CORE + ["scripts/check_coverage.py"]:
                     with self.subTest(location=location, file=item):
                         self.assertEqual((target / item).read_bytes(), (SKILL / item).read_bytes())
                 self.assertRegex(frontmatter(target / "SKILL.md"), r"(?m)^name: reviewlens$")

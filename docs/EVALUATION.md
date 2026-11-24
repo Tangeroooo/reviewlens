@@ -73,3 +73,9 @@ Also track `needs-more-evidence` separately: it is **not** a confirmed Finding. 
 ## Release gate
 
 Use a release candidate only when distribution tests pass, Claude/Codex packaging checks pass **where those CLIs are available**, and adversarial mode shows meaningful benefit on the same frozen set **without unacceptable increases in false positives or cost**. Prefer paired comparisons and inspect regressions individually. These case designs do not establish detection performance.
+
+## Coverage-audit acceptance cases
+
+Evaluate the auditor separately from defect discovery: provide original instruction sources, initial plan/history, code evidence and a draft report. Keep expected verdicts out of its context. Include omitted catalog items, absent independent P1–P8 paths, unsubstantiated workload assumptions, missing investigation boundaries, and a retrospectively reconstructed plan presented as original. The auditor should identify each gap, its source, and remaining work; merely writing a fuller table does not complete omitted inspection. Negative controls include no validation candidates and optional tests explicitly not run. They must not be reported as mandatory missing work. Also evaluate a complete no-finding review and a truthful partial review.
+
+Record false completion verdicts, false omission claims, instruction-to-plan reconciliation, and fidelity of stated breadth to actual evidence. The coverage-checker tests validate JSON accounting only; they do not establish that an agent follows instructions or that its inventory is complete.

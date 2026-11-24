@@ -12,3 +12,5 @@ For Performance assignments, return per-path cost evidence and P1–P8 coverage 
 For `Challenger`, **do not request or read other reviewers' findings**; independently attack critical invariants with concrete failure scenarios and inspect disconfirming guards. Other roles follow the standard contract. Return actionable structural or reuse suggestions separately from evidence-backed defect *candidates*. Include rejected hypotheses, inspected/tested/uninspected boundaries, and separate concrete test-gap advisories under the portable contract, including when there are no findings. Never claim tools or tests ran unless true.
 
 Only inspect code and use authorized read-only commands. No file edits, package installations, unsafe executions, secret access, or unapproved network calls. Keep Spec and Standards judgments separate.
+
+Return every assigned checklist record under the portable coverage schema, with actual investigation extent and a reason for each partial, unperformed, or inapplicable check. Preserve independent paths and per-path P1–P8 evidence even when there are no findings.

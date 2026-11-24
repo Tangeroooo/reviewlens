@@ -1,6 +1,6 @@
 # Systems lens — asynchronous services, performance, storage, and failure
 
-Read this only for changes affecting runtime scheduling, concurrent work, performance-sensitive paths, memory pressure, I/O, distributed behavior, or data storage. For a simple library change, do not invoke this lens automatically just because it uses Rust.
+Read this to inventory all review items; activate its code checks only for changes affecting runtime scheduling, concurrent work, performance-sensitive paths, memory pressure, I/O, distributed behavior, or data storage. For a simple library change, do not invoke this lens automatically just because it uses Rust.
 
 ## Async/concurrency and resource budgets
 

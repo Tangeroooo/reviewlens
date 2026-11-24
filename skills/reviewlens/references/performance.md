@@ -6,6 +6,8 @@ Apply in any language or application when a change affects repeated work, extern
 
 Trace the entry point through changed helpers and their consumers. Compare the resolved base and target for the **same input, configuration, and required semantics**. Record the operation, invocation unit (request, batch, item, retry, etc.), call count, data processed, and reuse lifetime. Inspect callees: a cheap slice or wrapper can hide repeated parsing, allocation, I/O, or synchronization.
 
+Establish expected workload from accessible repository evidence such as README, deployment configuration, limits, benchmarks, and actual consumers. Cite the sources and distinguish documented expectations from reviewer assumptions; if unavailable, record the unknown instead of inferring load solely from the application category. Record workload evidence separately for each independent path.
+
 Distinguish total work from elapsed time. Useful models include `calls × setup cost + items/bytes processed × unit cost` and the number of serial external waits. Two O(n) implementations can differ materially when one repeats expensive setup per item. A larger operation count does not by itself establish a latency multiplier or an outage.
 
 Inspect relevant earlier optimizations, callers, configuration defaults, and cost regression tests where accessible. Keep this history search local to affected behavior. An old optimization is evidence to examine, not authority to remove a new safety requirement. In blind evaluations, never read future fixes or answer keys.

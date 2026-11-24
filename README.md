@@ -2,7 +2,7 @@
 
 **Adversarial discovery, conservative reporting — general, Rust, and systems code reviews.**
 
-ReviewLens is a portable [Agent Skill](https://agentskills.io/specification) for **Claude Code and OpenAI Codex**. It examines a branch, PR, or working-tree diff through independent perspectives when the host supports subagents. It is intentionally small: seven core files, two optional Claude Code agent adapters, and no runtime dependencies.
+ReviewLens is a portable [Agent Skill](https://agentskills.io/specification) for **Claude Code and OpenAI Codex**. It examines a branch, PR, or working-tree diff through independent perspectives when the host supports subagents. It is intentionally small: eight core Markdown files, three optional Claude Code agent adapters, and an optional Python standard-library coverage checker.
 
 [English installation guide](docs/INSTALL.md) · [한국어 설치 가이드](docs/INSTALL.ko.md) · [한국어 README](README.ko.md)
 
@@ -18,7 +18,7 @@ ReviewLens is a portable [Agent Skill](https://agentskills.io/specification) for
 
 **Standard** uses 1–3 bounded discovery passes. **Adversarial** adds one *independent Challenger* to challenge assumptions with concrete failure scenarios (when subagents exist), followed by verification of every substantive candidate defect. High-risk changes (unsafe/FFI, storage recovery, atomic ordering, authentication, cancellation, etc.) automatically select Adversarial; you can request it explicitly for any diff.
 
-Both modes report an itemized coverage table with evidence, reasons for inapplicability, and any blocked checks. An outstanding applicable check makes the review partial. The coordinator performs final review of the full diff and coverage gaps after validation. The General pass traces consumers beyond the diff and checks both new duplication and existing reusable code. Rust reviews also inspect crate dependencies and public boundaries. Actionable design suggestions are reported separately from defects. The coordinator keeps Spec results separate from Standards/Technical results. A standalone skill falls back to clearly labeled single-agent passes if delegation is unavailable.
+Both modes enumerate every source-linked review item, including inapplicable and unperformed checks, with evidence, actual investigation extent, remaining boundaries, and omission reasons. A separate Coverage Auditor compares original instructions, the pre-discovery plan, per-path evidence, and the draft report even when there are no findings. The JSON coverage checker rejects missing records, grouped independent performance paths, and unsupported completion status; it cannot establish evidence quality or source-inventory completeness. An outstanding applicable check makes the review partial. The coordinator performs final review of the full diff and coverage gaps after validation. The General pass traces consumers beyond the diff and checks both new duplication and existing reusable code. Rust reviews also inspect crate dependencies and public boundaries. Actionable design suggestions are reported separately from defects. The coordinator keeps Spec results separate from Standards/Technical results. A standalone skill falls back to clearly labeled single-agent passes if delegation is unavailable.
 
 Performance checks compare base and target work for the same workload, including correctness/security/durability fixes. The [Performance reference](skills/reviewlens/references/performance.md) tracks P1–P8 separately per affected path and requires safe reuse boundaries. It shares existing discovery passes, preserves other coverage, and validates every performance candidate in both modes. Proven operation-count growth is distinguished from measured latency; necessary safety costs are not automatically defects.
 
@@ -65,7 +65,7 @@ For installation across all local projects add `-g`; for unattended installation
 
 Use `/reviewlens:reviewlens` when installed as a Claude Code plugin, `/reviewlens` for a standalone Claude Code skill, or `$reviewlens` in Codex.
 
-**Do not install both the standalone and plugin form in the same Claude Code environment unless you intentionally want two entries.** The plugin adds named Claude-specific reviewer/validator agents; the standalone skill uses the host's available delegation mechanism and falls back to sequential review if necessary.
+**Do not install both the standalone and plugin form in the same Claude Code environment unless you intentionally want two entries.** The plugin adds named Claude-specific reviewer/validator/coverage-auditor agents; the standalone skill uses the host's available delegation mechanism and falls back to sequential review if necessary.
 
 Full instructions, manual installation, verification, troubleshooting, and Windows notes: [INSTALL.md](docs/INSTALL.md) / [INSTALL.ko.md](docs/INSTALL.ko.md).
 
@@ -82,12 +82,14 @@ Scope + repository conventions + optional authoritative spec
     +-- Challenger (adversarial mode only) ---------+            |
                                                          independent validator
                                                                |
-                                                coordinator checks diff and gaps
+                                                separate Coverage Auditor
+                                                               |
+                                                coordinator resolves audit gaps
                                                                |
                                                    evidence + coverage report
 ```
 
-The two Markdown files in `skills/reviewlens/agents/` are **portable prompt contracts** (reviewer, Challenger role, and validator), not executable code. Native Claude Code plugin agent definitions are at repository `agents/` and share those contracts. No dependencies, network service, or generated report files are required.
+The three Markdown files in `skills/reviewlens/agents/` are **portable prompt contracts** (reviewer including Challenger, validator, and Coverage Auditor), not executable code. Native Claude Code plugin agent definitions are at repository `agents/` and share those contracts. No network service or generated report files are required. The optional mechanical checker reads JSON on stdin using Python 3 with no third-party packages; without Python, disclose manual accounting. Without subagents, disclose a self-audit instead of claiming independent audit.
 
 ## Repository layout
 
@@ -98,6 +100,8 @@ skills/reviewlens/
   SKILL.md                      # Portable coordinator
   agents/reviewer.md            # Portable worker contract
   agents/validator.md           # Portable verifier contract
+  agents/coverage-auditor.md    # Independent completeness audit
+  scripts/check_coverage.py    # Read-only JSON coverage accounting
   references/general.md         # General engineering + Spec
   references/performance.md     # Language-independent cost and safe reuse checks
   references/rust.md            # Trail of Bits + NVIDIA-inspired Rust lens

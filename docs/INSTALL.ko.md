@@ -43,7 +43,7 @@ claude plugin marketplace add Tangeroooo/reviewlens
 claude plugin install reviewlens@reviewlens-marketplace
 ```
 
-이후 `/reviewlens:reviewlens Review this PR.`처럼 호출합니다. 이 설치 방식에는 Claude Code에서 인식하는 `reviewlens-reviewer`, `reviewlens-validator` 서브 에이전트 정의도 포함됩니다. 모든 리뷰에서 에이전트가 고정 개수로 실행되는 것은 아닙니다.
+이후 `/reviewlens:reviewlens Review this PR.`처럼 호출합니다. 이 설치 방식에는 Claude Code에서 인식하는 `reviewlens-reviewer`, `reviewlens-validator`, `reviewlens-coverage-auditor` 서브 에이전트 정의도 포함됩니다. Coverage 감사는 finding 유무와 관계없이 두 모드 모두 수행하며, 결함 검증은 후보에 따라 수행합니다. 위임이 불가능하면 자체 감사임을 공개합니다. 모든 리뷰에서 에이전트가 고정 개수로 실행되는 것은 아닙니다.
 
 **Claude Code에 방법 A와 B를 중복 설치하지 않는 것을 권장합니다.** Codex는 방법 A, Claude Code는 방법 B로 설치할 경우 방법 A를 Codex 전용으로 실행하세요.
 
