@@ -10,7 +10,7 @@ ReviewLens is a portable [Agent Skill](https://agentskills.io/specification) for
 
 | Lens | What it catches | When it runs |
 | --- | --- | --- |
-| **General / Standards** | Behavior changes, design, tests, errors, compatibility, documented project rules | Always |
+| **General / Standards** | Behavior changes, design, general test coverage, error handling/chaining/messages, compatibility, documented project rules | Always |
 | **Spec** | Unmet requirements, unintended features, divergence from an actual spec | When a spec is available |
 | **Rust** | Unsafe invariants, ownership/FFI, panic policy, locks, idiomatic Rust | For Rust changes |
 | **Systems** | Async cancellation, bounded memory/backpressure, data visibility, durability/recovery | For relevant systems/storage changes |
@@ -25,6 +25,7 @@ ReviewLens is **read-only** by default. It is not a static analyzer and makes no
 - **`parking_lot`**: do not prescribe it automatically. Evaluate contention, poisoning, async boundaries, behavior, dependency cost, and project conventions.
 - **`tracing`**: do not prescribe it automatically. Follow the project's logging stack, including `log`, `tracing`, or other established approaches.
 - **Findings**: require a changed location, concrete trigger, likely impact, evidence, and a repair or regression-test direction.
+- **Test coverage**: assess changed behavioral contracts across success paths, boundaries, state transitions, integration, compatibility, and relevant failures/concurrency. Report concrete test gaps separately from demonstrated defects; coverage percentages alone do not prove correctness. Distinguish review coverage, test evidence, and tests actually executed.
 - **Other languages**: the General and Spec lenses still work even without Rust code.
 
 ## Installation (quick start)

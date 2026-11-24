@@ -35,6 +35,8 @@ Inspect repo guidance (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, coding stand
 
 Use **at most three discovery reviewers** by default (General, optional Spec, optional Specialized). Do not run a giant vulnerability-agent matrix or one agent per checklist heading. Reference documents are loaded **only when applicable**.
 
+The General pass always assesses general test coverage independently of error review, and checks error handling, chaining, and messages on affected paths. Assign every applicable lens to a pass, including when passes are combined. Combining passes reduces worker count, not the applicable instructions. If required guidance or code is inaccessible, record the missing coverage rather than silently treating it as reviewed.
+
 ## 3. Review independently where supported
 
 Read [agents/reviewer.md](agents/reviewer.md). If the host supports subagents, delegate each selected pass (prefer the registered `reviewlens:reviewlens-reviewer` when installed as a Claude Code plugin) with: the exact scope, resolved base/diff command, available spec, relevant repo rules, appropriate reference file paths/content, and a read-only mandate. The agents must inspect the actual code; never assume files are magically available across isolated contexts. Concurrent workers may be used when supported.
@@ -42,6 +44,8 @@ Read [agents/reviewer.md](agents/reviewer.md). If the host supports subagents, d
 If subagents are unavailable, conduct **separate sequential passes** and explicitly identify them as single-agent reviews; do **not** claim independent validation. Do not fail a review just because the host lacks a particular agent tool.
 
 Keep **Spec** findings separate from **Standards/Technical** findings. Do not let a clean standards report cancel an unmet requirement. Deduplicate substantially identical technical findings in the coordinator; cross-reference overlap with Spec instead of hiding either axis.
+
+Before reporting, reconcile selected lenses and material changed contracts with worker coverage notes. Complete any omitted applicable checks within scope, or disclose the limitation. Preserve concrete test gaps even when a worker returns `No findings`; this means no confirmed defects, not complete test coverage. Do not turn this reconciliation into a checklist dump for irrelevant categories.
 
 ## 4. Validate candidate findings
 
@@ -56,7 +60,10 @@ Use a concise report with:
 - **Scope**: base/ref or worktree, changed paths, inspected context, tests actually run, whether agents were available, and limitations.
 - **Standards & Technical**: confirmed findings, ordered by severity.
 - **Spec**: findings evaluated independently, or `Not evaluated — no authoritative spec was available`.
-- **Coverage**: lenses that ran, noteworthy boundaries not inspected, and any unresolved candidates.
+- **Review coverage**: lenses/checks that ran, noteworthy boundaries not inspected, inaccessible guidance, and any unresolved candidates. Distinguish inapplicable checks from applicable checks not completed.
+- **Test coverage assessment**: material changed contracts and supporting test evidence, concrete gaps/advisories and minimal test directions, and inspection limitations. Distinguish tests inspected from tests executed and their results; summarize when no material gaps are identified. This is general behavioral coverage, not only error-path coverage or a line-coverage percentage.
+
+Missing tests alone are normally advisories in the test coverage assessment. Explicit repository test-policy violations may be Standards findings; demonstrated runtime defects retain impact-based severity and include a regression-test direction without a duplicate missing-test finding. Before reporting a test-policy violation, verify the rule applies and existing tests do not already satisfy it. A documented Spec requirement for tests remains independently evaluated under Spec.
 
 Each finding must include: `ID`, `severity` (`critical|high|medium|low`), `confidence` (`high|medium|low`), `file:line`, category, concrete trigger, observable impact, code/spec evidence, and a minimal correction or regression-test direction. Cite changed lines where possible. Separate **mandatory rules** from **context-dependent recommendations**. Do not output a finding for generic stylistic taste or a hypothetical failure with no reachable path.
 
