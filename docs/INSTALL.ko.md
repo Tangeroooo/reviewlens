@@ -90,7 +90,22 @@ python3 -m unittest discover -s tests -v
 claude plugin validate .
 ```
 
-Claude Code의 단독 설치는 `/reviewlens`, 플러그인 설치는 `/reviewlens:reviewlens`, Codex는 `/skills` 또는 `$reviewlens`로 확인합니다. 실제 Git diff를 대상으로 리뷰를 요청하고 결과에 **리뷰 범위, 적용한 관점, 실제 서브 에이전트 사용 여부**가 기록되는지 확인하세요. 명세가 없다면 Spec 결과는 통과가 아닌 **미평가**로 보고해야 합니다.
+Claude Code의 단독 설치는 `/reviewlens`, 플러그인 설치는 `/reviewlens:reviewlens`, Codex는 `/skills` 또는 `$reviewlens`로 확인합니다. 실제 Git diff를 대상으로 리뷰를 요청하고 결과에 **리뷰 범위, 모드, 검토한 불변식, 코드 확인과 테스트 실행의 차이, 실제 서브 에이전트 사용 여부**가 기록되는지 확인하세요. 명세가 없다면 Spec 결과는 통과가 아닌 **미평가**로 보고해야 합니다.
+
+## 리뷰 모드 사용 예시
+
+```text
+# Claude Code 네이티브 플러그인
+/reviewlens:reviewlens origin/main 대비 이 PR을 Adversarial 모드로 리뷰해줘. 취소와 복구 경로를 집중 검증해줘.
+
+# Claude Code 단독 스킬
+/reviewlens 작업 트리를 적대적으로 검토하고 불변식과 미검증 경로를 보고해줘.
+
+# Codex
+$reviewlens Adversarial mode로 Storage 변경의 반례를 찾아 검증해줘.
+```
+
+위험도가 낮은 변경은 Standard가 기본이며, 고위험 변경은 Adversarial을 자동 선택합니다. 독립 Challenger는 **서브 에이전트가 실제 지원되는 경우에만** 실행됩니다. 지원하지 않는 경우 단계별 단일 에이전트 검토로 전환하고 독립 실행이 아니었음을 표시합니다. Fuzzing·Miri·장애 주입·고비용 테스트는 승인 없이 실행하지 않습니다. 성능 평가 방법은 [한국어 평가 가이드](EVALUATION.ko.md)를 참고하세요.
 
 ## 업데이트
 

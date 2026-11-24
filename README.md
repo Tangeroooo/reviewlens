@@ -1,8 +1,8 @@
 # ReviewLens
 
-**Evidence-driven code review, from general engineering to Rust and systems code.**
+**Adversarial discovery, conservative reporting — general, Rust, and systems code reviews.**
 
-ReviewLens is a portable [Agent Skill](https://agentskills.io/specification) for **Claude Code and OpenAI Codex**. It examines a branch, PR, or working-tree diff through independent perspectives when the host supports subagents. It is intentionally small: six core files, two optional Claude Code agent adapters, and no runtime dependencies.
+ReviewLens is a portable [Agent Skill](https://agentskills.io/specification) for **Claude Code and OpenAI Codex**. It examines a branch, PR, or working-tree diff through independent perspectives when the host supports subagents. It is intentionally small: seven core files, two optional Claude Code agent adapters, and no runtime dependencies.
 
 [English installation guide](docs/INSTALL.md) · [한국어 설치 가이드](docs/INSTALL.ko.md) · [한국어 README](README.ko.md)
 
@@ -11,11 +11,16 @@ ReviewLens is a portable [Agent Skill](https://agentskills.io/specification) for
 | Lens | What it catches | When it runs |
 | --- | --- | --- |
 | **General / Standards** | Behavior changes, design, general test coverage, error handling/chaining/messages, compatibility, documented project rules | Always |
+| **Performance** | Lost batching, repeated computation, I/O/work amplification, allocations, serial waits, and contention | Every diff is screened; applicable paths in any language |
 | **Spec** | Unmet requirements, unintended features, divergence from an actual spec | When a spec is available |
 | **Rust** | Unsafe invariants, ownership/FFI, panic policy, locks, idiomatic Rust | For Rust changes |
 | **Systems** | Async cancellation, bounded memory/backpressure, data visibility, durability/recovery | For relevant systems/storage changes |
 
-A normal review uses **1–3 discovery reviewers**, not dozens of workers. Confirmed high-risk findings receive an additional validation check when supported. The coordinator keeps Spec results separate from Standards/Technical results; a pass on one does not imply a pass on the other.
+**Standard** uses 1–3 bounded discovery passes. **Adversarial** adds one *independent Challenger* to challenge assumptions with concrete failure scenarios (when subagents exist), followed by verification of every substantive candidate defect. High-risk changes (unsafe/FFI, storage recovery, atomic ordering, authentication, cancellation, etc.) automatically select Adversarial; you can request it explicitly for any diff.
+
+Both modes report an itemized coverage table with evidence, reasons for inapplicability, and any blocked checks. An outstanding applicable check makes the review partial. The coordinator performs final review of the full diff and coverage gaps after validation. The General pass traces consumers beyond the diff and checks both new duplication and existing reusable code. Rust reviews also inspect crate dependencies and public boundaries. Actionable design suggestions are reported separately from defects. The coordinator keeps Spec results separate from Standards/Technical results. A standalone skill falls back to clearly labeled single-agent passes if delegation is unavailable.
+
+Performance checks compare base and target work for the same workload, including correctness/security/durability fixes. The [Performance reference](skills/reviewlens/references/performance.md) tracks P1–P8 separately per affected path and requires safe reuse boundaries. It shares existing discovery passes, preserves other coverage, and validates every performance candidate in both modes. Proven operation-count growth is distinguished from measured latency; necessary safety costs are not automatically defects.
 
 ReviewLens is **read-only** by default. It is not a static analyzer and makes no promise to discover every bug.
 
@@ -24,9 +29,23 @@ ReviewLens is **read-only** by default. It is not a static analyzer and makes no
 - **Production `unwrap()` / `expect()`**: prohibited by the ReviewLens default; distinguish policy violations from reachable panics. Test-only use is allowed.
 - **`parking_lot`**: do not prescribe it automatically. Evaluate contention, poisoning, async boundaries, behavior, dependency cost, and project conventions.
 - **`tracing`**: do not prescribe it automatically. Follow the project's logging stack, including `log`, `tracing`, or other established approaches.
-- **Findings**: require a changed location, concrete trigger, likely impact, evidence, and a repair or regression-test direction.
+- **Findings**: require a changed location, violated invariant or demonstrated cost regression, concrete trigger or crash/interleaving, reachable path, impact, defenses checked, and a fix/test direction. Unsupported hypotheses are not confirmed defects.
 - **Test coverage**: assess changed behavioral contracts across success paths, boundaries, state transitions, integration, compatibility, and relevant failures/concurrency. Report concrete test gaps separately from demonstrated defects; coverage percentages alone do not prove correctness. Distinguish review coverage, test evidence, and tests actually executed.
-- **Other languages**: the General and Spec lenses still work even without Rust code.
+- **Other languages**: the General, Spec, and Performance lenses work without Rust or systems code.
+
+## Choose review depth
+
+- **Standard (default for low-risk diffs):** check behavior, standards, requirements, and applicable Performance/Rust/Systems constraints; validate important candidates.
+- **Adversarial (automatic for high-risk diffs, or on request):** invariant-first analysis, independent Challenger when supported, failure/crash/concurrency hypotheses, falsification of **all substantive** candidates, and a coverage/uncertainty record.
+
+Example calls:
+
+```text
+/reviewlens:reviewlens Adversarially review this segment lifecycle PR against origin/main.
+$reviewlens Review this storage-engine diff in adversarial mode; find and verify counterexamples.
+```
+
+The Challenger returns **evidence-backed candidates, rejected hypotheses, and unresolved paths**; only validator-confirmed defects appear as findings. "Inspected" never means "executed" or "proven safe". See [evaluation guide](docs/EVALUATION.md) for measuring detection, false positives, coverage, and cost on real PRs.
 
 ## Installation (quick start)
 
@@ -59,13 +78,16 @@ Scope + repository conventions + optional authoritative spec
     |
     +-- General / Standards ----------------------+
     +-- Spec (only with source of truth) ----------+--> candidate findings
-    +-- Rust + Systems (when relevant) ------------+            |
-                                                         validator (selective)
+    +-- Performance / Rust / Systems (as needed) --+            |
+    +-- Challenger (adversarial mode only) ---------+            |
+                                                         independent validator
                                                                |
-                                                    evidence-backed report
+                                                coordinator checks diff and gaps
+                                                               |
+                                                   evidence + coverage report
 ```
 
-The two Markdown files in `skills/reviewlens/agents/` are **portable prompt contracts**, not executable code. Native Claude Code plugin agent definitions are at repository `agents/` and share those contracts. No dependencies, network service, or generated report files are required.
+The two Markdown files in `skills/reviewlens/agents/` are **portable prompt contracts** (reviewer, Challenger role, and validator), not executable code. Native Claude Code plugin agent definitions are at repository `agents/` and share those contracts. No dependencies, network service, or generated report files are required.
 
 ## Repository layout
 
@@ -77,10 +99,13 @@ skills/reviewlens/
   agents/reviewer.md            # Portable worker contract
   agents/validator.md           # Portable verifier contract
   references/general.md         # General engineering + Spec
+  references/performance.md     # Language-independent cost and safe reuse checks
   references/rust.md            # Trail of Bits + NVIDIA-inspired Rust lens
   references/systems.md         # NVIDIA-inspired systems + original DB lens
 docs/INSTALL.md                 # English installation (default)
 docs/INSTALL.ko.md              # Korean installation
+docs/EVALUATION.md              # English review-quality evaluation
+docs/EVALUATION.ko.md           # Korean evaluation
 docs/SOURCES.md                 # Attribution + licensing approach
 ```
 
@@ -91,6 +116,19 @@ docs/SOURCES.md                 # Attribution + licensing approach
 - Codex: `$reviewlens Review this PR against the issue requirements and check Rust concurrency.`
 - Any host: `Use ReviewLens to review these storage-layer changes; focus on crash recovery and memory bounds.`
 
+## v0.4.0 changes
+
+- Screen every changed path for performance impact, regardless of language or PR intent.
+- Add per-path cost comparison, P1–P8 coverage, and validation without weakening correctness or increasing the discovery pass budget.
+- Extend evaluation with cross-domain regression/control pairs; distribution checks do not establish detection accuracy.
+
+## v0.2.0 changes
+
+- Added risk-based **Adversarial** mode with an independent Challenger role, without increasing the six-file core.
+- Required invariant/failure-hypothesis coverage and accurate reporting of what was inspected versus actually tested.
+- Hardened Rust unsafe/synchronization probes and storage crash/retry/resource-budget checks.
+- Validator now actively falsifies every substantive candidate in Adversarial mode.
+
 ## Testing and distribution
 
 ```bash
@@ -99,7 +137,7 @@ python3 -m unittest discover -s tests -v
 claude plugin validate .
 ```
 
-The tests validate packaging, links, manifests, and local skill installation layout; they are **not** a real-world review accuracy benchmark. Validate with representative buggy PRs before claiming improved detection rates. No benchmarks or production adoption are claimed.
+The tests validate packaging, links, manifests, review-protocol contracts, and local skill installation layout; they are **not** a real-world review accuracy benchmark. Follow [EVALUATION.md](docs/EVALUATION.md) with buggy **and clean** PRs before claiming improved detection rates. No benchmarks or production adoption are claimed.
 
 ## Publishing (maintainer only)
 

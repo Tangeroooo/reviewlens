@@ -90,7 +90,22 @@ python3 -m unittest discover -s tests -v
 claude plugin validate .
 ```
 
-In Claude Code, `/reviewlens` appears for standalone installs and `/reviewlens:reviewlens` for plugin installs. In Codex, use `/skills` or type `$reviewlens` in the input. Ask for a focused review of a real Git diff. The final report should state the scope, review lenses used, and whether independent subagents actually ran. Missing spec must be reported as **not evaluated**, never silently fabricated.
+In Claude Code, `/reviewlens` appears for standalone installs and `/reviewlens:reviewlens` for plugin installs. In Codex, use `/skills` or type `$reviewlens` in the input. Ask for a focused review of a real Git diff. For rigorous review say `adversarial mode` (also activated automatically for high-risk changes). The final report should state the scope, review mode, invariants and failures examined, **inspected vs actually tested** boundaries, and whether independent subagents actually ran. Missing spec must be reported as **not evaluated**, never silently fabricated.
+
+## Review mode examples
+
+```text
+# Claude Code native plugin
+/reviewlens:reviewlens Adversarially review this PR against origin/main, focusing on cancellation and crash recovery.
+
+# Claude Code standalone skill
+/reviewlens Review the worktree in adversarial mode. List invariants examined and unresolved paths.
+
+# Codex
+$reviewlens Adversarial mode: independently challenge and verify the changed storage path.
+```
+
+For low-risk changes, Standard is the default. In Adversarial mode, ReviewLens adds one independent Challenger **if the host supports delegation**; otherwise its additional pass must be labeled **not independent**. The skill never runs fuzzing, Miri, fault injection, or expensive tests without authorization. See [evaluation guide](EVALUATION.md) for a reproducible assessment method.
 
 ## Updating
 
@@ -102,7 +117,7 @@ In Claude Code, `/reviewlens` appears for standalone installs and `/reviewlens:r
 
 - **Skill not found:** verify `SKILL.md` is immediately inside the `reviewlens` directory, not `reviewlens/reviewlens/SKILL.md`; restart if needed.
 - **No subagent delegation:** the platform may not expose subagent tools. ReviewLens falls back to separate single-agent passes and must disclose that in its report. Only the Claude native plugin bundles pre-registered named agents.
-- **No requirements source:** the Spec lens is skipped and marked `not evaluated`; General/Rust/Systems review still runs.
+- **No requirements source:** the Spec lens is skipped and marked `not evaluated`; General and applicable Performance/Rust/Systems review still runs.
 - **No diff/base:** specify a Git base or show uncommitted changes. The skill must not guess a comparison point.
 - **Review permissions:** only grant the coding agent repository read access necessary to inspect code. ReviewLens instructs read-only behavior, but agent permissions are controlled by the host. Review external skill files before allowing shell access.
 - **Duplicate Claude entries:** remove either standalone or plugin installation.

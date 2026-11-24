@@ -2,6 +2,10 @@
 
 Use for changed Rust code. Combine the language-safety emphasis inspired by Trail of Bits with practical Rust guidance inspired by NVIDIA Switchyard. The checklist is **risk-directed**: establish real paths and invariants, not syntax-pattern violations alone.
 
+## Workspace, crate and module boundaries
+
+For changed code or manifests, identify the owning crate and its consumers. Read workspace and member `Cargo.toml` files together with imports: a shared workspace dependency declaration alone does not create an edge. Distinguish normal, build, dev and feature-gated dependencies that affect the reviewed path. Trace `pub` visibility and re-exports to downstream users. Before proposing reuse across crates, check whether it would invert an established layer, introduce a cycle, expose an internal type, or activate an unnecessary feature. Cite the concrete edge and affected API.
+
 ## Safety and representation
 
 - **Ownership/lifetimes:** Are borrowed values valid through all uses? Does shared ownership unintentionally retain large objects? Inspect self-referential patterns, pins, interior mutability, and lifetime assumptions at FFI boundaries.
@@ -25,6 +29,14 @@ Use for changed Rust code. Combine the language-safety emphasis inspired by Trai
 - **Synchronization choice:** **Never require `parking_lot` just because `std::sync::Mutex` or `RwLock` appears.** Compare scope duration, workload/contention, fairness, poisoning policy, compatibility, dependency cost, and behavior during panic. `parking_lot` lacks poisoning; this can be a semantic difference. `tokio::sync` primitives allow asynchronous acquisition; synchronous locks may be appropriate for short, `.await`-free sections. Do not block executor threads waiting on contended synchronous locks, and do not hold synchronous guards across `.await`.
 - **Pointer/sync complexity:** Do not prescribe `Arc<Mutex<T>>` or remove it without verifying ownership and concurrent access. Avoid gratuitous atomic lock-free rewrites.
 - **Idioms:** Favor transparent control flow, correct `Result` handling, predictable types, and minimal boilerplate. Preserve established naming, lint, and dependency standards. Avoid mass renaming for taste.
+
+## Adversarial Rust probes (high-risk changes)
+
+- **Unsafe proofs:** List preconditions and postconditions for each modified unsafe boundary. Attempt one counterexample for aliasing, pointer provenance/alignment, initialization, length/capacity, panic/unwind, or lifetime as applicable. Also inspect whether a *safe public API* allows a caller to break the unsafe preconditions.
+- **Publication and synchronization:** Distinguish concurrent execution from an actual race. Write a concrete ordering showing which store/load/lock establishes the required visibility. Examine stale generation, lost wake-ups, ABA, double-release, and teardown races only where the code makes them plausible.
+- **Panic and cancellation:** Follow ownership of resources when an async future is dropped, a task is aborted, or a callback panics. Check whether `Drop` restores invariants or whether partial state becomes externally visible.
+- **Boundary/control:** A passing borrow check, `Send`/`Sync` inference, clippy, or Miri run is evidence about certain classes of behavior, **not** proof of overall API or storage correctness. Never claim UB solely from a suspicious primitive.
+- **`unwrap()` / `expect()` defaults remain REQUIRED:** A changed production use can be reported as a standards issue even if impossibility of failure has been established; demonstrate a reachable error path before claiming a crash. Respect genuine test-only or generated-code exceptions.
 
 ## Targeted validation (only if available and appropriate)
 
