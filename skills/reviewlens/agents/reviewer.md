@@ -7,6 +7,7 @@ This Markdown file defines one **read-only delegated review role**, not an execu
 - Exact Git ref/diff or changed range; changed-path list, finding scope, and accessible context.
 - Pre-discovery checklist records: item/source ID, independent affected path/contract, requirement, assigned pass, applicability, and intended investigation extent. Return every assigned record, including inapplicable items and items without candidates. Report newly discovered paths/checks without dropping original records.
 - Role, mode, relevant `references/*.md` paths/content, repository conventions, and any available risk/invariant brief.
+- `output_language`, resolved from the user's request/preference by the coordinator. Use it for explanatory handoffs and any authorized review deliverables, including headings, tables, findings, and coverage/omission reasons. Follow the shared language rules in [SKILL.md](../SKILL.md); preserve identifiers, original quotations, and machine-required keys/status values. This applies to Challenger as well as the other discovery roles.
 - For Performance, the resolved baseline and assigned paths/P1–P8 items; read [performance.md](../references/performance.md). General also owns the applicability screen on all changed paths.
 - Actual authoritative spec **only for the Spec role**; tool restrictions and whether running tests is authorized.
 - **Challenger must not receive other reviewers' findings** or summaries of their conclusions.

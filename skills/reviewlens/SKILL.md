@@ -11,6 +11,14 @@ metadata:
 
 **Adversarial in discovery; conservative in reporting.** Find real counterexamples, not more comments. ReviewLens is **read-only** unless the user separately requests fixes.
 
+## Output language (all roles and deliverables)
+
+Resolve `output_language` from the user's explicit output-language preference; otherwise use the language of their natural-language review request. For mixed-language input, use the primary language of that request, retaining an established preference when a short follow-up provides no new language signal. Do not infer the output language from source code, repository documentation, quoted logs, or these English skill instructions.
+
+Pass `output_language` explicitly to Reviewer, Challenger, Validator, and Coverage Auditor. Use it consistently in their explanatory handoffs and **all user-facing deliverables**: the chat answer, detailed review files, audit files, checklist tables, titles/headings, findings, recommendations, and omission reasons. If files are used, an English audit or review file accompanying a Korean answer is not compliant. Apply the same rule to later report revisions unless the user changes the preference.
+
+Keep code identifiers, paths, commands, finding/check IDs, exact source quotations, and machine-required JSON keys/enum values unchanged. Write surrounding explanations and free-text JSON evidence/reasons in `output_language`. Human-readable labels may be translated while retaining canonical status codes, such as `부분 검토 (partial)`. English template headings below describe required content; they do not prescribe English prose. Do not translate identifiers or weaken a verdict while localizing the report.
+
 ## 1. Resolve scope and evidence
 
 1. Inspect Git status and the user's requested target. Resolve references before calculating a diff.
@@ -72,7 +80,7 @@ Before delegation, identify up to five critical, *verifiable* contracts from cha
 
 ## 3. Discover defects independently
 
-Assign the General pass responsibility for impact beyond the diff, duplication within the PR, existing implementations elsewhere, and package dependency direction. Apply the Rust lens to affected crate boundaries, including manifest-only changes. Read [agents/reviewer.md](agents/reviewer.md). Supply every pass with the resolved code scope, relevant source/context, repo constraints, reference paths, authorized tool limits, and a read-only mandate. For **Challenger**, also provide the risk/invariant brief, but **do not provide other reviewers' candidate findings or conclusions**: it must attempt an independent attack on assumptions.
+Assign the General pass responsibility for impact beyond the diff, duplication within the PR, existing implementations elsewhere, and package dependency direction. Apply the Rust lens to affected crate boundaries, including manifest-only changes. Read [agents/reviewer.md](agents/reviewer.md). Supply every pass with the resolved code scope, relevant source/context, repo constraints, reference paths, `output_language`, authorized tool limits, and a read-only mandate. For **Challenger**, also provide the risk/invariant brief, but **do not provide other reviewers' candidate findings or conclusions**: it must attempt an independent attack on assumptions.
 
 - With subagents, delegate independent passes (Claude Code plugin provides `reviewlens:reviewlens-reviewer` for **all** discovery roles). Concurrent passes are optional.
 - Without subagents, perform separately labeled sequential passes. The Challenger is then **not independent**; explicitly disclose this. Do not imply multi-agent execution or independent validation when unavailable.
@@ -81,7 +89,7 @@ Assign the General pass responsibility for impact beyond the diff, duplication w
 
 ## 4. Challenge and verify findings
 
-Read [agents/validator.md](agents/validator.md). Prefer the independent `reviewlens:reviewlens-validator` Claude agent when available; otherwise clearly label a self-check.
+Read [agents/validator.md](agents/validator.md). Supply `output_language` with the candidate and evidence. Prefer the independent `reviewlens:reviewlens-validator` Claude agent when available; otherwise clearly label a self-check.
 
 - **Standard:** validate all critical/high and uncertain medium candidates, plus every performance defect candidate regardless of severity. Verify policy-only issues directly against source and repo standards.
 - **Adversarial:** validate **every substantive behavior/security/correctness/performance candidate, including low severity**. Simple documented policy violations may be source-checked without a separate agent. Deduplicate first without dropping distinct trigger/impact paths.
@@ -96,7 +104,7 @@ Tests, Miri, Loom, fuzzing, profilers, fault injection, and reproductions may he
 
 After discovery and any required candidate validation, prepare the full coverage records and draft report. Run [agents/coverage-auditor.md](agents/coverage-auditor.md) in a **separate independent agent context**, preferably `reviewlens:reviewlens-coverage-auditor` for the Claude plugin. This is an audit role outside the discovery pass budget; do not replace it with the defect validator. It audits original instructions → pre-discovery plan → actual evidence/breadth → final report, including every independent performance path and P1–P8.
 
-Supply the original instruction sources (including other explicitly active review skills), source access, initial plan and additions, assignments, worker evidence, test/tool results, optional validator verdicts, and draft report. The auditor must independently check the catalog against the original sources; a valid JSON ledger alone is insufficient. With no subagents, perform a separately labeled **self-audit** under the same contract and disclose the lack of independence.
+Supply the original instruction sources (including other explicitly active review skills), source access, initial plan and additions, assignments, worker evidence, test/tool results, optional validator verdicts, `output_language`, draft detailed deliverables, and the proposed user-facing summary. The auditor must independently check the catalog against the original sources; a valid JSON ledger alone is insufficient. It must also check language consistency and whether the summary faithfully explains the detailed results and limitations. With no subagents, perform a separately labeled **self-audit** under the same contract and disclose the lack of independence.
 
 Return missing inspections to the responsible reviewer and correct missing records or overstated conclusions. Resubmit the changed evidence/report for audit. A new defect candidate still follows the validator gate. Resolve `invalid` accounting before delivery; if missing work cannot be completed within authorization or budget, record it accurately and deliver **partial**. Never upgrade an auditor's partial verdict merely because there are no findings. No-validator-needed is a legitimate outcome; no-findings is not a reason to skip the coverage audit.
 
@@ -108,7 +116,7 @@ In Adversarial mode the **coordinator is the final reviewer**, distinct from del
 
 Preserve concrete test gaps even when a worker returns `No findings`; this means no confirmed defects, not complete test coverage.
 
-Return, in the user's language:
+The detailed review must contain the following in `output_language`. When separate review/audit files are used within the authorized delivery workflow, keep the complete checklist and evidence there and link them from the chat answer; the chat summary may be shorter but must satisfy the delivery requirements below. Without separate deliverables, provide the full report inline after its summary. Splitting deliverables must not drop checklist items or audit limitations, and does not authorize source edits or new file destinations.
 
 1. **Scope / mode:** base SHA or worktree, changed paths, repo/spec material, selected mode and why; actual reviewer/subagent use and tests executed.
 2. **Verified technical findings:** highest severity first. Each includes `ID`, `severity`, `confidence`, `path:line`, category, **violated invariant** (or demonstrated cost regression for Performance), concrete **trigger/input or interleaving/crash point**, reachable code path, **observable impact**, counterevidence checked, and minimal correction or regression test.
@@ -126,3 +134,15 @@ Missing tests alone are normally advisories in the test coverage assessment. Exp
 Severity is about impact: `critical` = imminent severe integrity/security exposure; `high` = likely data loss/security/outage; `medium` = reachable functional failure or material bounded risk; `low` = documented standards breach or minor defect. A concrete failure or demonstrated material cost regression is different from an optimization hypothesis. Grade performance by supported resource/latency/throughput impact, not by the presence of a loop or cache opportunity. `Production unwrap()/expect()` is a default policy violation, but a crash Finding requires a reachable failure path. Follow repository context for `parking_lot` and `tracing`.
 
 **Finding quality gate:** If the alleged trigger, path, missing guard, or impact cannot be substantiated, reject or mark the hypothesis unresolved. Be relentless in searching for counterexamples, restrained in reporting defects. No padding with style opinions, arbitrary test quotas, or invented benchmarks.
+
+### User-facing answer when delivering the review
+
+The chat answer must stand on its own: the user should understand what was found, what the review establishes, and what to do next without opening files. Do not reduce it to completion counts, an audit status, or report links. Make it shorter than the detailed report by omitting full execution traces and the exhaustive checklist, not by omitting decision-relevant information.
+
+- Lead with the actual conclusion and scope: reviewed target/mode, confirmed defects versus remaining uncertainty, and complete/partial review status. No findings means no confirmed defects in the inspected scope, not proof of safety or an automatic merge recommendation.
+- Explain the material findings in severity order. For each summarized finding include its ID/severity, relevant location, concrete trigger, practical impact, and correction direction. Include every critical/high finding and any other result that changes the user's next action. When other findings remain in the detailed report, state that explicitly and link their section; do not imply the summary is exhaustive.
+- Summarize actual investigation breadth, important test gaps, tests/checks executed and their results, and consequential checks not run with reasons. Distinguish source-derived performance evidence from measurements. For a no-finding review, explain the significant contracts/paths checked and remaining limits rather than merely saying "no issues".
+- Explain the Coverage Auditor's verdict and its basis: whether audit was independent or a self-audit, gaps resolved during review, and remaining uninspected boundaries or unverifiable planning history. Keep code defects, coverage gaps, and reporting corrections distinct. An audit does not itself complete missing code inspection.
+- Give prioritized next actions tied to those results, and descriptive links to the actual detailed review and audit deliverables if present. Do not invent files, tests, counts, or actions for an empty category.
+
+Use several focused paragraphs or readable bullets, scaled to the findings and uncertainty; there is no fixed word or bullet quota. Preserve an explicit user-requested response format or length. Before delivery, reconcile the chat answer, review file, audit file, and coverage ledger: same target, finding IDs/severities/counts, audit verdict, execution status, and remaining work. After incorporating the auditor's actual result, update the summary accordingly; substantive changes to evidence or verdicts require renewed audit under the existing gate. All deliverables remain in `output_language`.

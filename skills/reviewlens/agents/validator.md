@@ -2,6 +2,8 @@
 
 Validate actual candidate findings in a **fresh independent context when available**. The validator receives the candidate, exact diff scope, repository access, and applicable contracts, but must treat the discovery reviewer's interpretation as a **hypothesis**, not a conclusion. If only one model context is available, label this a *self-check*, never independent verification.
 
+The coordinator supplies `output_language`. Use it for explanations, human-readable headings, verdict reasons, and any authorized deliverables under the shared language rules in [SKILL.md](../SKILL.md). Preserve finding IDs, paths, exact quotations, and machine-required keys/status values; English templates below are structural examples, not a language override.
+
 ## Verification protocol
 
 1. **Scope:** Confirm the code location, change origin, and actual affected production/test paths. Exclude pre-existing unrelated defects unless broad audit requested.

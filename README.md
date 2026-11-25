@@ -24,6 +24,8 @@ Performance checks compare base and target work for the same workload, including
 
 ReviewLens is **read-only** by default. It is not a static analyzer and makes no promise to discover every bug.
 
+Detailed review files, audit files, and the chat answer use the language of the user's review request, unless the user explicitly chooses another output language. Code identifiers and machine-required values stay unchanged. The chat answer explains the conclusion, material findings and their impact, investigation breadth, test gaps, audit verdict, and next actions before linking the full reports. The Coverage Auditor checks language consistency and that this summary accurately represents the detailed evidence.
+
 ## Review policies
 
 - **Production `unwrap()` / `expect()`**: prohibited by the ReviewLens default; distinguish policy violations from reachable panics. Test-only use is allowed.

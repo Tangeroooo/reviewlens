@@ -6,7 +6,8 @@ Audit **whether the required review was performed and accurately reported**, not
 
 - Exact target/base, changed-path inventory and accessible code, including relevant unchanged consumers.
 - Original user requests, repository rules, authoritative requirements, all ReviewLens references, and any other explicitly active review skill instructions. Read the originals rather than trusting the coordinator's summary. If a source is inaccessible, report that limitation.
-- Pre-discovery catalog/plan, later additions with their reasons, assignments, worker coverage records, tool/test results, validator verdicts if any, and proposed final report.
+- Pre-discovery catalog/plan, later additions with their reasons, assignments, worker coverage records, tool/test results, validator verdicts if any, draft detailed review/audit deliverables if present, and proposed user-facing summary.
+- `output_language` and the original user's language preference/request. Apply the shared rules in [SKILL.md](../SKILL.md) to your own audit explanations, headings, tables, and any authorized audit file as well as checking the reviewed deliverables. Preserve identifiers, exact quotations, and machine-required keys/status values.
 - Access restrictions, execution authorization, and the coordinator's actual investigation budget. Do not install dependencies or modify reviewed files.
 
 ## Audit protocol
@@ -18,6 +19,7 @@ Audit **whether the required review was performed and accurately reported**, not
 5. **Evidence → report:** Every catalog item and planned path must remain visible in the final checklist, with status, actual extent, result/evidence, and reasons for partial, unperformed, or inapplicable work. Ensure narrative conclusions do not overstate the records. Distinguish an instruction-compliance audit from newly performed code review; auditing a missing check does not complete it.
 6. **Legitimate omissions:** No candidate requiring validation can justify no validator invocation. Optional tests need not execute merely because a review occurred; disclose their non-execution and reason. Explicitly required testing still must be accounted for. Respect user language and scope requirements. Do not invent obligations from another skill whose source is unavailable.
 7. **Mechanical check:** When Python execution is available, run [check_coverage.py](../scripts/check_coverage.py) on the supplied JSON ledger via stdin. Exit 0 means structurally complete, 2 valid partial, 1 invalid. The tool cannot prove source inventory, planning chronology, or evidence quality; independently audit those. Disclose an unavailable tool and perform the accounting manually.
+8. **Language and delivery:** Check that explanatory content in the chat summary and every detailed review/audit deliverable uses `output_language`, including table headings and omission reasons. English code, quotations, and canonical status values are valid exceptions. Check that the summary is understandable without opening files: conclusion/scope, material findings with trigger/impact/action, investigation breadth, tests and significant gaps, audit status/basis, and prioritized next steps. Compare IDs, severities, counts, target, execution claims, and unresolved work across deliverables. A links-only or counts-only summary is insufficient unless explicitly requested. Report missing explanations or conflicting claims as reporting corrections, not code defects. The JSON checker does not assess language or summary adequacy.
 
 ## Verdict and handoff
 
@@ -25,7 +27,7 @@ Return `complete`, `partial`, or `invalid`:
 
 - `complete`: all required criteria are accounted for and applicable checks have sufficient evidence for their stated extent; report any separately disclosed optional non-execution. This is not proof of defect absence.
 - `partial`: records accurately expose unfinished applicable review, inaccessible instructions/evidence, or an unfulfilled planning requirement.
-- `invalid`: missing/duplicate items or path records, unsupported completion claims, missing reasons/extent, or a final report that contradicts the evidence. This must be corrected before delivery; the correction may truthfully downgrade the review to partial.
+- `invalid`: missing/duplicate items or path records, unsupported completion claims, missing reasons/extent, a final report that contradicts the evidence, or delivery that violates the required language/summary contract. This must be corrected before delivery; the correction may truthfully downgrade the review to partial. A language-only correction does not require redoing established code inspection.
 
 For every gap provide: `source criterion | record/path | expected vs observed extent | evidence | required follow-up | responsible pass`. Also return sources audited, planning chronology verified or unknown, mechanical-check command/result or reason not run, and audit limitations. Do not silently resolve gaps by deleting requirements or relabeling them inapplicable.
 
