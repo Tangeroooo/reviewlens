@@ -1,15 +1,15 @@
 ---
 name: reviewlens
-description: Evidence-driven, adversarial code review for PRs, branches, and working-tree diffs. Traces cross-package impact, checks module boundaries and reuse, and reviews correctness, requirements, and performance regressions; adds Rust safety and systems/database lenses when relevant. Challenges invariants, failure paths, and assumptions in risky changes, then independently verifies candidate defects. Use for rigorous PR, diff, implementation, Rust, concurrency, or storage reviews; not for writing features.
+description: Evidence-driven code review for PRs, branches, and working-tree diffs. Reviews correctness, code quality and maintainability, requirements, cross-package impact, reuse, and performance regressions; adds Rust safety and systems/database lenses when relevant. Independently verifies candidate defects and separates supported quality improvements from bugs. Use for PR, diff, implementation, Rust, concurrency, or storage reviews; not for writing features.
 license: MIT
 metadata:
   author: Tangeroooo
-  version: "0.4.0"
+  version: "0.5.0"
 ---
 
 # ReviewLens
 
-**Adversarial in discovery; conservative in reporting.** Find real counterexamples, not more comments. ReviewLens is **read-only** unless the user separately requests fixes.
+**Adversarial in discovery; conservative in reporting.** Find real counterexamples, not more comments. Also assess code quality and report supported maintenance improvements without inventing defects. ReviewLens is **read-only** unless the user separately requests fixes.
 
 ## Output language (all roles and deliverables)
 
@@ -46,6 +46,8 @@ Default to **Standard**, but automatically use **Adversarial** for material chan
 Use **at most three standard discovery passes** (General, optional Spec, optional combined technical lenses) and **one additional Challenger** in Adversarial mode. Combine compatible lenses when safe; do not launch an agent per checklist heading. Read all four reference documents to inventory their review criteria, including criteria from inactive lenses; execute only applicable checks. A Spec pass must remain independent: no spec means **not evaluated**, not "passed".
 
 The General pass always assesses general test coverage independently of error review, and checks error handling, chaining, and messages on affected paths. Assign every applicable lens to a pass, including when passes are combined. Combining passes reduces worker count, not the applicable instructions. If required guidance or code is inaccessible, record the missing coverage rather than silently treating it as reviewed.
+
+General also always assesses **code quality**, including changes with no behavior defect. Prioritize cohesion/responsibility boundaries, whether a design pattern improves the actual design, and reuse of the same policy across code. Use readability, state representation, dependency direction, and testability as supporting evidence. Apply Q1–Q5 in [general.md](references/general.md), preserve their individual coverage records, and report evidence-backed maintenance improvements separately from defect findings. Compare pattern proposals with keeping the current design or a small local refactor; never require a named pattern. This uses the existing pass budget and adds no suggestion quota.
 
 General owns the **performance applicability screen for every changed path**, including bug fixes and safety improvements. Load the Performance reference when a path changes repeated computation, batching, external operations, processed data, resource lifetime, or scheduling; uncertainty requires tracing, not dismissal. Record evidence when no cost-relevant behavior changes. Assign applicable P1–P8 checks to General or an existing technical pass (combine Rust/Systems/Performance as needed), without adding an agent per lens or dropping existing checks. Performance is independent of Systems activation and the PR title.
 
@@ -95,7 +97,7 @@ Read [agents/validator.md](agents/validator.md). Supply `output_language` with t
 - **Adversarial:** validate **every substantive behavior/security/correctness/performance candidate, including low severity**. Simple documented policy violations may be source-checked without a separate agent. Deduplicate first without dropping distinct trigger/impact paths.
 - Supply performance candidates with [performance.md](references/performance.md) and their cost evidence. Distinguish proven work amplification, measured latency, necessary safety costs, and unverified optimization ideas. Never require weakening correctness, security, or durability to recover baseline speed.
 - The validator actively **tries to disprove** each candidate using actual guards, invariants, configuration, callers, compensating actions, and execution ordering. Explicitly classify `confirmed`, `rejected`, or `needs-more-evidence`.
-- Validate actionable design/reuse suggestions against their cited sites and contracts. Keep them separate from defect counts. Return rejected candidates and reasons to the coordinator as well.
+- Source-check every code-quality/design/reuse advisory against its cited sites, present maintenance cost, and proposed correction's tradeoffs, using the quality-advisory protocol in the validator reference. The coordinator can do this check; use the existing validator when the consequences are uncertain. Do not require a runtime failure to support an advisory. Keep it separate from defect counts, and return unsupported suggestions and reasons to the coordinator as well.
 - Never report `needs-more-evidence` as confirmed. A high-impact *unverified* path may appear as a clearly marked coverage limitation or follow-up test, **not** a proven defect.
 
 Tests, Miri, Loom, fuzzing, profilers, fault injection, and reproductions may help when authorized and applicable, but an analysis-only review is not a test. Record which checks truly executed and their outcomes. Do not silently create test fixtures or change source as part of a review.
@@ -114,7 +116,7 @@ In **both modes**, first reconcile the full source-instruction inventory against
 
 In Adversarial mode the **coordinator is the final reviewer**, distinct from delegated discovery and validation workers. Re-read the PR intent and full scoped diff. Compare each changed contract with the coverage returned by the workers, inspect overlooked callers or consumers and revisit consequential disagreements at source. Send new or reopened defect candidates through the same validator before reporting them. If the host provides only one context, perform discovery, candidate validation when required, coverage audit, and final reconciliation sequentially; label the result a self-check/self-audit.
 
-Preserve concrete test gaps even when a worker returns `No findings`; this means no confirmed defects, not complete test coverage.
+Preserve concrete test gaps and supported code-quality advisories even when a worker returns `No findings`; this means no confirmed defects, not complete test coverage or an absence of maintenance concerns.
 
 The detailed review must contain the following in `output_language`. When separate review/audit files are used within the authorized delivery workflow, keep the complete checklist and evidence there and link them from the chat answer; the chat summary may be shorter but must satisfy the delivery requirements below. Without separate deliverables, provide the full report inline after its summary. Splitting deliverables must not drop checklist items or audit limitations, and does not authorize source edits or new file destinations.
 
@@ -122,7 +124,7 @@ The detailed review must contain the following in `output_language`. When separa
 2. **Verified technical findings:** highest severity first. Each includes `ID`, `severity`, `confidence`, `path:line`, category, **violated invariant** (or demonstrated cost regression for Performance), concrete **trigger/input or interleaving/crash point**, reachable code path, **observable impact**, counterevidence checked, and minimal correction or regression test.
    Performance findings also include the same-workload base → target work, safety/reuse boundary, and whether impact was source-derived, counted in an executed check, or timed.
 3. **Spec verdict:** report independently, or `Not evaluated — no authoritative spec`.
-4. **Design and reuse suggestions** (when actionable): cite both sites or the dependency edge, the maintenance consequence and a compatible alternative. Keep open questions separate.
+4. **Code quality, design and reuse assessment:** summarize the Q1–Q5 scope even with no advisories. For supported suggestions cite the changed location and relevant callers/related sites, present comprehension or maintenance cost, counterevidence, and minimal behavior-preserving correction with its tradeoff. Reuse suggestions still cite both implementations and dependency direction. Keep advisories, open questions, and confirmed defects distinct; do not force a suggestion for each Q item.
 5. **Full review checklist and uncertainty:** include the complete item-level coverage record defined above, even with zero findings. Keep every item and independent path visible, including inapplicable and unperformed checks; do not collapse different evidence or scopes. Include actual investigation extent, unexamined boundaries and reasons. Report checklist reconciliation/tool outcome and `complete` or `partial`, plus material hypotheses confirmed/rejected/unresolved. Distinguish `inspected`, `actually tested`, and `not inspected`; no zero-finding result proves safety.
 
 6. **Test coverage assessment**: material changed contracts and supporting test evidence, concrete gaps/advisories and minimal test directions, and inspection limitations. Distinguish tests inspected from tests executed and their results; summarize when no material gaps are identified. This is general behavioral coverage, not only error-path coverage or a line-coverage percentage.
@@ -141,6 +143,7 @@ The chat answer must stand on its own: the user should understand what was found
 
 - Lead with the actual conclusion and scope: reviewed target/mode, confirmed defects versus remaining uncertainty, and complete/partial review status. No findings means no confirmed defects in the inspected scope, not proof of safety or an automatic merge recommendation.
 - Explain the material findings in severity order. For each summarized finding include its ID/severity, relevant location, concrete trigger, practical impact, and correction direction. Include every critical/high finding and any other result that changes the user's next action. When other findings remain in the detailed report, state that explicitly and link their section; do not imply the summary is exhaustive.
+- Separately summarize actionable code-quality advice and its maintenance consequence when it changes the next action. A zero-defect review may still have supported improvements; do not describe them as proven runtime failures or merge blockers without an applicable requirement. When none is supported, state the assessed quality scope without padding the answer with preferences.
 - Summarize actual investigation breadth, important test gaps, tests/checks executed and their results, and consequential checks not run with reasons. Distinguish source-derived performance evidence from measurements. For a no-finding review, explain the significant contracts/paths checked and remaining limits rather than merely saying "no issues".
 - Explain the Coverage Auditor's verdict and its basis: whether audit was independent or a self-audit, gaps resolved during review, and remaining uninspected boundaries or unverifiable planning history. Keep code defects, coverage gaps, and reporting corrections distinct. An audit does not itself complete missing code inspection.
 - Give prioritized next actions tied to those results, and descriptive links to the actual detailed review and audit deliverables if present. Do not invent files, tests, counts, or actions for an empty category.

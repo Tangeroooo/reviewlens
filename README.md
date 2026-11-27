@@ -10,7 +10,7 @@ ReviewLens is a portable [Agent Skill](https://agentskills.io/specification) for
 
 | Lens | What it catches | When it runs |
 | --- | --- | --- |
-| **General / Standards** | Behavior changes, design, general test coverage, error handling/chaining/messages, compatibility, documented project rules | Always |
+| **General / Standards** | Behavior, code quality/maintainability (Q1–Q5), design/reuse, test coverage, errors, compatibility, documented project rules | Always |
 | **Performance** | Lost batching, repeated computation, I/O/work amplification, allocations, serial waits, and contention | Every diff is screened; applicable paths in any language |
 | **Spec** | Unmet requirements, unintended features, divergence from an actual spec | When a spec is available |
 | **Rust** | Unsafe invariants, ownership/FFI, panic policy, locks, idiomatic Rust | For Rust changes |
@@ -23,6 +23,8 @@ Both modes enumerate every source-linked review item, including inapplicable and
 Performance checks compare base and target work for the same workload, including correctness/security/durability fixes. The [Performance reference](skills/reviewlens/references/performance.md) tracks P1–P8 separately per affected path and requires safe reuse boundaries. It shares existing discovery passes, preserves other coverage, and validates every performance candidate in both modes. Proven operation-count growth is distinguished from measured latency; necessary safety costs are not automatically defects.
 
 ReviewLens is **read-only** by default. It is not a static analyzer and makes no promise to discover every bug.
+
+Code quality is reviewed even when outputs are correct. General prioritizes cohesion, design-pattern suitability, and code reuse against actual responsibilities, callers, and contracts. It compares a proposed pattern with the current design and a smaller local refactor, maps its roles to concrete code, and weighs the benefit against added coupling and indirection. Readability, state, and testability provide supporting evidence. Supported advice includes a current maintenance cost, a minimal compatible correction and its tradeoff. It is source-checked and kept separate from defects, test gaps, and unanswered questions. Naming tastes, arbitrary function-length limits, and speculative future frameworks are not actionable advice.
 
 Detailed review files, audit files, and the chat answer use the language of the user's review request, unless the user explicitly chooses another output language. Code identifiers and machine-required values stay unchanged. The chat answer explains the conclusion, material findings and their impact, investigation breadth, test gaps, audit verdict, and next actions before linking the full reports. The Coverage Auditor checks language consistency and that this summary accurately represents the detailed evidence.
 
@@ -121,6 +123,12 @@ docs/SOURCES.md                 # Attribution + licensing approach
 - Claude Code standalone: `/reviewlens Review my branch relative to origin/main.`
 - Codex: `$reviewlens Review this PR against the issue requirements and check Rust concurrency.`
 - Any host: `Use ReviewLens to review these storage-layer changes; focus on crash recovery and memory bounds.`
+
+## v0.5.0 changes
+
+- General always reviews Q1–Q5 with cohesion/responsibility boundaries (Q2), design-pattern suitability (Q4), and compatible code reuse (Q5) as the primary axes; readability/control flow (Q1) and state representation (Q3) support the judgment.
+- Report source-checked maintenance advice even when current behavior is correct, separately from confirmed bugs and open questions. Each suggestion needs a present cost, minimal compatible correction, and tradeoff; no style quota or automatic refactor.
+- Preserve the existing discovery-pass budget, correctness/performance checks, and coverage audit. Review workers, validators, and auditors share the same advisory contract.
 
 ## v0.4.0 changes
 

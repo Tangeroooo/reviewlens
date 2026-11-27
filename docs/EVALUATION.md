@@ -20,6 +20,22 @@ Use separate, blind reviews for both variants of each pair. Keep the answer key 
 
 Record confirmed defects, actionable design suggestions, false positives on controls, and cross-package paths inspected. Track the time and token cost. For each unique finding added or rejected at final review, record whether adjudication supports that decision.
 
+## Code-quality advisory/control pairs
+
+Evaluate Q1–Q5 separately from bug recall: correct outputs do not establish maintainability, and a supported advisory must not inflate defect counts. Freeze the changed scope, current maintenance task/contract, counterevidence, and acceptable correction tradeoffs before review. Use blind separate contexts for each variant; do not provide the expected advisory or its control.
+
+| Case | Potentially actionable change | Control | What to assess |
+| --- | --- | --- | --- |
+| Cohesion | A policy and its invariant are split across owners, while one module mixes independently changing responsibilities. | The same responsibility is grouped with its state and a narrow interface; a larger function is cohesive. | Trace actual change reasons and invariant owners; do not score module/function count as cohesion. |
+| Pattern suitability | Existing independently varying policies or lifecycle decisions are scattered across repeated dispatch sites. | One stable policy needs only a direct function, or an existing enum/helper already owns the variation. | Compare current/local/pattern options, map participants to real code and assess added cost; accept a pattern only when it improves the evidenced design. |
+| Readability/control flow | A current decision is spread through opaque flags and indirect branches across actual callers. | A local explicit branch expresses the same rule, even if longer. | Trace the decision and explain the present reading cost; no line-count verdict. |
+| State/interface | A new positional record requires producers and consumers to coordinate undocumented indices and derived fields. | A direct predicate or existing named value carries only the needed contract; or an explicit stable wire format requires positional fields. | Cite producer/consumer sites and constraints; prefer the smallest compatible representation. |
+| Abstraction | Unused extension hooks route a single current policy through configuration and wrapper layers. | A superficially similar boundary protects a documented compatibility or test contract. | Check real callers and the reason for the boundary before recommending removal. |
+| Change locality | One current policy is now scattered across independent edits with no owner. | Similar code implements intentionally different policies with incompatible errors or dependencies. | Explain actual edit sites and sharing costs; do not force reuse. |
+| Testability | Pure policy now reads hidden global/environment state, requiring unrelated integration setup. | An existing explicit seam or integration test already exercises the policy reliably. | Verify the claimed obstacle and the available tests; keep test-gap and quality advice distinct. |
+
+Record Q1–Q5 coverage, supported/deduplicated advisories, unsupported advice on controls, invented runtime defects, and whether corrections preserve contracts. Include no-advisory and zero-defect-with-advisory outcomes in the validator/auditor acceptance cases. Check that a missing quality inspection remains partial even if all bug hypotheses were rejected. A supported advisory alone is not a merge blocker without an applicable requirement. These cases are evaluation designs, not executed measurements or a mandate for a new review pass.
+
 ## Performance regression/control pairs
 
 Evaluate Performance across languages and applications, independently of Systems activation. Use the same frozen inputs to compare the previous skill and the candidate in each mode; keep model, tools, budget, and other checks fixed. Track existing correctness findings as well as performance detection so added coverage cannot hide losses elsewhere.
@@ -85,3 +101,5 @@ Record false completion verdicts, false omission claims, instruction-to-plan rec
 Use the same review evidence with different user requests and draft deliverables; do not change the defect or coverage facts. Include a Korean request with English source/skill text, an English request with Korean comments, a mixed-language follow-up with an established preference, and an explicit output-language override. Expect explanatory text in chat, detailed review, audit, and coverage reasons to follow the resolved request language, while identifiers, quotations, JSON keys and canonical status values remain intact. A Korean chat answer with an English audit file must be corrected.
 
 Contrast links/counts-only answers with self-contained summaries covering material trigger/impact/action, actual breadth, test execution/gaps, audit basis and remaining work. Include no-finding and partial reviews, an explicitly requested terse answer, and a summary whose verdict/counts disagree with the files. Check that presentation corrections do not invent new code defects, imply unexecuted tests passed, erase checklist items from the detailed report, or upgrade a partial review. These are evaluation designs, not executed language-detection or model-behavior tests; the JSON checker does not validate prose language or summary adequacy.
+
+A bounded [Q1–Q5 advisory/control trial](evals/code-quality/report.md) preserves two synthetic inputs and fresh-context worker reports. It tests the quality-pass component only, not full review accuracy or improvement over the previous skill.
