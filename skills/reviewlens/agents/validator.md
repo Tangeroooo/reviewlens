@@ -20,7 +20,11 @@ For **every Performance candidate in both modes**, read [performance.md](../refe
 
 If authorized, a minimal non-destructive reproduction or targeted test can strengthen evidence; distinguish tests that **ran** from tests that were merely suggested. Never edit source or perform unsafe actions solely to prove a finding.
 
-For design and reuse candidates, verify both implementations and their consumers, including error behavior, ownership and dependencies needed to share code. Return a supported suggestion with the concrete tradeoff, a rejection with the relevant difference, or an open question. Preserve the verdict and reason for the coordinator, including rejected defect candidates.
+## Code-quality advisory check
+
+This check can be performed by the coordinator; independent defect-validation rules above remain unchanged. For every quality/design/reuse suggestion, compare base and target and inspect the cited callers, state updates, or related implementations. Check whether the alleged comprehension/maintenance burden is present in the changed scope, not a preference or imagined future requirement. Read relevant conventions and look for a reason the existing shape is useful: compatibility, a stable format, deliberately separate policies, a test seam, or an ownership boundary.
+
+Verify that the smallest proposed change preserves behavior, error timing, ownership and dependency direction; for reuse, inspect both implementations and their consumers. Return `supported advisory`, `unsupported`, or `open question` with the evidence, tradeoff and remaining uncertainty. Absence of a runtime failure does not reject a supported advisory, and support does not turn it into a confirmed bug. If a concrete behavior or policy violation emerges, send it through the normal defect protocol. Preserve reasons for rejected suggestions and deduplicate suggestions that share one cause.
 
 ## Output for every defect candidate
 

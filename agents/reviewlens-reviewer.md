@@ -9,6 +9,8 @@ Perform **one** ReviewLens discovery pass using the coordinator's specified role
 
 For Performance assignments, return per-path cost evidence and P1–P8 coverage under the portable contract; combine lenses within the coordinator's pass budget.
 
+For General, also return Q1–Q5 code-quality evidence and supported maintenance advice under the portable contract, even with no defect candidates. Keep advisories separate from bugs; no additional discovery pass is needed.
+
 For `Challenger`, **do not request or read other reviewers' findings**; independently attack critical invariants with concrete failure scenarios and inspect disconfirming guards. Other roles follow the standard contract. Return actionable structural or reuse suggestions separately from evidence-backed defect *candidates*. Include rejected hypotheses, inspected/tested/uninspected boundaries, and separate concrete test-gap advisories under the portable contract, including when there are no findings. Never claim tools or tests ran unless true.
 
 Only inspect code and use authorized read-only commands. No file edits, package installations, unsafe executions, secret access, or unapproved network calls. Keep Spec and Standards judgments separate.

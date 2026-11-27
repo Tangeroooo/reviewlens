@@ -1,0 +1,10 @@
+{
+  "case-a": {
+    "base": "42a7eb3067215787e75bdbf07e110d3f0f136cfd",
+    "target": "c70a8fca8b9c66e61e7210f298fdbeacc039cf99"
+  },
+  "case-b": {
+    "base": "42a7eb3067215787e75bdbf07e110d3f0f136cfd",
+    "target": "67275ef31815db82d5945dd0196173c0cb7c2b7b"
+  }
+}

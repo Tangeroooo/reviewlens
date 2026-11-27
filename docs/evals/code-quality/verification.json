@@ -1,0 +1,25 @@
+{
+  "sha256": {
+    "a-plan.md": "5f6b0f9998052705719ba1ae321205d590613ca029322a988a8249c5971dbba9",
+    "a-review.md": "b5e9dbfc66cfbaad43a0eb63fc40cae76919cec605fa836645c88064c9b869d1",
+    "b-plan.md": "aff2d4c7459e017f7562d93be4fe06656baef238fe49bc88df21dd3cce3f31da",
+    "b-review.md": "602b20594054508c7106ad49e954f0d68e162900383d78dbb500e29cd3b98396",
+    "base/REQUEST.md": "49d5a4e7f2d485cd6674056551b374b6d4b27f792effc04ba95ac1b2424dc1cb",
+    "base/api.py": "6ba227c3f2766456be19a911d029c2a92038fa8e9c50544548f451d157c64113",
+    "base/queue_selection.py": "54542f33991cd2fa7b4cf4b20d7eec2f4ff8554d090f994fac2b251ad26fa718",
+    "base/test_policy.py": "4ddbb06752035943d8d6326c4b8c3829cddfe2d3c75f910dec4ca90abce945de",
+    "case-a/REQUEST.md": "49d5a4e7f2d485cd6674056551b374b6d4b27f792effc04ba95ac1b2424dc1cb",
+    "case-a/api.py": "1caf111b9ee41b3d4a38c929e73f4f519e32d3d266cd1cc8fb7df00f7051db2b",
+    "case-a/policy.py": "06be592cca4c82a5ded078ec926e69d5a1f3ddc1152331b40d8ac8a6e8b588c1",
+    "case-a/queue_selection.py": "4646895689297f8547b338e50fe6c503b69ac1f9da5cfede2045b3e719282d37",
+    "case-a/test_policy.py": "4ddbb06752035943d8d6326c4b8c3829cddfe2d3c75f910dec4ca90abce945de",
+    "case-b/REQUEST.md": "49d5a4e7f2d485cd6674056551b374b6d4b27f792effc04ba95ac1b2424dc1cb",
+    "case-b/api.py": "2c9acaf5b0a915b77727a67295efdc72e06d9107ca0897fbc09b282aea2a3e08",
+    "case-b/policy.py": "a97efca2432c607a366e93c038feaea68c184125050e163e6b7facba3e0e1be3",
+    "case-b/queue_selection.py": "57790e414dee6cf4d7a9530c8c5aec6b725495ac576d19de63a1b681d3acdca7",
+    "case-b/test_policy.py": "4ddbb06752035943d8d6326c4b8c3829cddfe2d3c75f910dec4ca90abce945de",
+    "ground-truth.md": "0688ff08685cd93c0ebd2f73f026a48b0c88dc3e7e3c7a5255a58b20b2d5b278",
+    "refs.json": "7a4ed94a2215893e3d547e21f91350d4281407d208a16f1eda7aad3f29d6f5c4",
+    "report.md": "8c21bf5d66825d84e23e758e4409a54456a7ff02901b82d3023cbea391540ea8"
+  }
+}
