@@ -24,7 +24,7 @@ Performance checks compare base and target work for the same workload, including
 
 ReviewLens is **read-only** by default. It is not a static analyzer and makes no promise to discover every bug.
 
-Code quality is reviewed even when outputs are correct. General checks readability, interfaces, state, abstraction cost, and change/test locality against actual callers and conventions. Supported advice includes a current maintenance cost, a minimal compatible correction and its tradeoff. It is source-checked and kept separate from defects, test gaps, and unanswered questions. Naming tastes, arbitrary function-length limits, and speculative future frameworks are not actionable advice.
+Code quality is reviewed even when outputs are correct. General prioritizes cohesion, design-pattern suitability, and code reuse against actual responsibilities, callers, and contracts. It compares a proposed pattern with the current design and a smaller local refactor, maps its roles to concrete code, and weighs the benefit against added coupling and indirection. Readability, state, and testability provide supporting evidence. Supported advice includes a current maintenance cost, a minimal compatible correction and its tradeoff. It is source-checked and kept separate from defects, test gaps, and unanswered questions. Naming tastes, arbitrary function-length limits, and speculative future frameworks are not actionable advice.
 
 Detailed review files, audit files, and the chat answer use the language of the user's review request, unless the user explicitly chooses another output language. Code identifiers and machine-required values stay unchanged. The chat answer explains the conclusion, material findings and their impact, investigation breadth, test gaps, audit verdict, and next actions before linking the full reports. The Coverage Auditor checks language consistency and that this summary accurately represents the detailed evidence.
 
@@ -126,7 +126,7 @@ docs/SOURCES.md                 # Attribution + licensing approach
 
 ## v0.5.0 changes
 
-- General always reviews code quality through Q1–Q5: readability/control flow, responsibilities/interfaces, state representation, proportional abstraction/dependencies, and change locality/testability.
+- General always reviews Q1–Q5 with cohesion/responsibility boundaries (Q2), design-pattern suitability (Q4), and compatible code reuse (Q5) as the primary axes; readability/control flow (Q1) and state representation (Q3) support the judgment.
 - Report source-checked maintenance advice even when current behavior is correct, separately from confirmed bugs and open questions. Each suggestion needs a present cost, minimal compatible correction, and tradeoff; no style quota or automatic refactor.
 - Preserve the existing discovery-pass budget, correctness/performance checks, and coverage audit. Review workers, validators, and auditors share the same advisory contract.
 

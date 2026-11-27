@@ -26,6 +26,8 @@ This check can be performed by the coordinator; independent defect-validation ru
 
 Verify that the smallest proposed change preserves behavior, error timing, ownership and dependency direction; for reuse, inspect both implementations and their consumers. Return `supported advisory`, `unsupported`, or `open question` with the evidence, tradeoff and remaining uncertainty. Absence of a runtime failure does not reject a supported advisory, and support does not turn it into a confirmed bug. If a concrete behavior or policy violation emerges, send it through the normal defect protocol. Preserve reasons for rejected suggestions and deduplicate suggestions that share one cause.
 
+For cohesion advice, trace the current responsibilities, shared state/invariants, and actual reasons the affected units change together. For reuse, distinguish shared policy from similar syntax and verify the proposed owner's dependencies and contract compatibility. For pattern advice, compare the mapped functions/types/modules with keeping the existing design and a smaller local change; verify a present variation or coupling problem and the cost of added indirection. Reject pattern-name matching and speculative extension needs, but support a pattern when it solves the evidenced problem better than the alternatives.
+
 ## Output for every defect candidate
 
 ```text

@@ -22,7 +22,7 @@ This Markdown file defines one **read-only delegated review role**, not an execu
 6. Report only candidates with code/spec evidence. An uncertain claim may be returned as a *hypothesis for validator*, explicitly marked unresolved; never present it as a confirmed defect.
 
 7. For General, assess error handling, chaining, and messages on affected paths, and independently assess general test coverage for material changed contracts. Follow the detailed criteria in [general.md](../references/general.md). For specialized passes, contribute relevant failure/contract/test evidence; do not assume another pass covered it. When lenses are combined, apply each supplied guide.
-   General also assesses Q1–Q5 in that reference on relevant changed responsibilities, including behavior-preserving changes. Return each item's evidence/status even when it produces no suggestion. Preserve the existing impact, duplication, reuse, and dependency checks; do not launch another pass for quality.
+   General also assesses Q1–Q5 in that reference on relevant changed responsibilities, including behavior-preserving changes. Prioritize cohesion (Q2), design-pattern suitability (Q4), and reuse (Q5); use clarity/state evidence to support the design judgment. Return each item's evidence/status even when it produces no suggestion. Preserve the existing impact, duplication, reuse, and dependency checks; do not launch another pass for quality.
 8. Return item-level coverage evidence under the coordinator checklist identifying checks completed, inapplicable checks where useful, and applicable checks blocked or omitted. Connect material changed contracts to test locations/assertions, concrete gaps, or inspection limits. Separate inspected tests from execution results and distinguish confirmed behavior from reasoned scenarios. Do not interpret `No findings` as proof that tests are sufficient.
 
 ## Challenger protocol — Adversarial mode only
@@ -67,6 +67,7 @@ Present comprehension or maintenance cost: ...
 Base -> target evidence and counterevidence: ...
 Minimal behavior-preserving correction: ...
 Tradeoff / why retaining the current design might be appropriate: ...
+For a pattern proposal: current problem / retain-or-local-refactor alternative / actual functions, types, or modules playing each role / benefit versus added cost: ...
 Status: proposed advisory | open question
 ```
 
